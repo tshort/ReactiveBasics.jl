@@ -2,7 +2,10 @@ module LightReactive
 
 export Signal, value, foldp, subscribe!
 
-# Derived from the Swift Interstellar package
+# This API mainly follows that of Reactive.jl. One difference is that `merge` 
+# returns a Tuple of Signals rather than the Signal with the highest precedence.
+
+# The algorithms for were derived from the Swift Interstellar package
 # https://github.com/JensRavens/Interstellar/blob/master/Sources/Signal.swift
 # Copyright (c) 2015 Jens Ravens (http://jensravens.de)
 # Offered with the MIT license
@@ -10,26 +13,37 @@ export Signal, value, foldp, subscribe!
 
 """
 A Signal is value that will contain a value in the future.
-The value of a signal can change at any time.
+The value of the signal can change at any time.
 
-Use `next` to subscribe to updates and `update` to update the current value of the signal.
+Use `map` to derive new signals, subscribe!` to subscribe to updates of a signal,
+and `push!` to update the current value of a signal. `value` returns the current
+value of a signal.
 
-    text = Signal<String>()
+```julia
+text = Signal("")
 
-    text.next { string in
-        println("Hello \(string)")
-    }
+text2 = map(s -> "Bye \$s", text)
 
-    text.update(.Success("World"))
-"""
-
-type Signal{T}
-   value::T
-   callbacks::Vector{Function}     # Is Function too restrictive here?
+subscribe!(text) do s
+    println("Hello \$s")
 end
 
-Signal(val) = Signal(val, Function[])
+push!(text, "world")
 
+value(text)
+value(text2)
+```
+"""
+type Signal{T}
+   value::T
+   callbacks::Vector   # usually Functions, but could be other callable types
+end
+
+Signal(val) = Signal(val, Any[])
+
+"""
+The current value of the signal.
+"""
 value(u::Signal) = u.value
 
 """
@@ -56,22 +70,26 @@ end
 function Base.map(f, u::Signal, v::Signal, w::Signal, xs::Signal...)
     us = (u,v,w,xs...)
     signal = Signal(f((u.value for u in us)...))
+    @show signal
     for (i,u) in enumerate(us)
-        subscribe!(x -> push!(signal, f((i == j ? x : us[j].value for j in 1:length(us)))), u)
+        subscribe!(u) do x
+            vals = f(((i == j ? x : us[j].value for j in 1:length(us))...)...)
+            push!(signal, vals)
+        end
     end
     signal
 end
 
 """
-Update the value of a Signal and propagate the change.
+Update the value of a signal and propagate the change.
 """
 function Base.push!(u::Signal, val)
     u.value = val
-    map(f -> f(val), u.callbacks)
+    foreach(f -> f(val), u.callbacks)
 end
 
 """
-Subscribe to the changes of this signal.
+Subscribe to the changes of this signal. Every time the signal is updated, the function `f` runs.
 """
 function subscribe!(f, u::Signal)
     push!(u.callbacks, f)
@@ -79,16 +97,13 @@ function subscribe!(f, u::Signal)
 end
 
 
-
 """
-Merge another signal into the current signal. This creates a signal that is
-a success if both source signals are a success. The value of the signal is a
+Merge another signal into the current signal. The value of the signal is a
 Tuple of the values of the contained signals.
     
     signal = merge(Signal("Hello"), Signal("World"))
     value(signal)
 """
-Base.merge(f, us::Signal...) = map!()
 function Base.merge(u::Signal, v::Signal)
     signal = Signal((u.value, v.value))
     subscribe!(x -> push!(signal, (x, v.value)), u)
@@ -104,22 +119,31 @@ function Base.merge(u::Signal, v::Signal, w::Signal)
 end
 function Base.merge(u::Signal, v::Signal, w::Signal, xs::Signal...)
     us = (u,v,w,xs...)
-    signal = Signal((u.value for u in us))
+    signal = Signal(((u.value for u in us)...))
     for (i,u) in enumerate(us)
-        subscribe!(x -> push!(signal, (i == j ? x : us[j].value for j in 1:length(us))), u)
+        subscribe!(x -> push!(signal, ((i == j ? x : us[j].value for j in 1:length(us))...)), u)
     end
     signal
 end
 
 """
-Fold/map over past values
+Fold/map over past values. The first argument to the function `f`
+is an accumulated value that the function can operate over, and the 
+second is the current value coming in. `v0` is the initial value of
+the accumulated value.
+
+    a = Signal(2)
+    # accumulate sums coming in from a, starting at zero
+    b = foldp(+, 0, a) # b == 2
+    push!(a, 2)        # b == 4
+    push!(a, 3)        # b == 7
 """
 function foldp(f, v0, us::Signal...)
     map(x -> v0 = f(v0, x), us...)
 end
 
 """
-Filter
+Return a signal that updates based on the signal `u` if `f(value(u))` evaluates to `true`.
 """
 function Base.filter{T}(f, default::T, u::Signal{T})
     signal = Signal(f(u.value) ? u.value : default)

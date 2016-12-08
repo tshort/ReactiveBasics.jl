@@ -1,7 +1,6 @@
 using LightReactive
 using FactCheck
 
-queue_size() = Base.n_avail(Reactive._messages)
 number() = round(Int, rand()*1000)
 
 ## Basics
@@ -48,6 +47,10 @@ facts("Basic checks") do
 
         push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a))
+        
+        e = merge(d, b, a, Signal(3))
+        push!(a, number())
+        @fact value(e) --> (value(d), value(b), value(a), 3)
     end
 
     context("foldp") do
@@ -92,6 +95,27 @@ facts("Basic checks") do
         @fact value(b) --> 3
         @fact value(a) --> 3
 
+    end
+
+    context("jw3126") do   # https://github.com/JuliaLang/Reactive.jl/issues/101
+        x1 = Signal(1)
+        x2 = Signal(10)
+        y1 = map(identity, x1)
+        y2 = map(identity, x2)
+        y12 = map(+, x1, x2)
+        z = map(+, y1, y2, y12)
+        y12 = map(+, x1, x2)
+        z = map(+, y1, y2, y12)
+        push!(x1, 3)
+        @fact value(x1)  -->  3
+        @fact value(x2)  --> 10
+        @fact value(y1)  -->  3
+        @fact value(y2)  --> 10
+        @fact value(y12) --> 13
+        @fact value(z)   --> 26
+        zz = map(+, y1, y2, y12, Signal(3))
+        push!(x1, 3)
+        @fact value(zz)  --> 29
     end
 
 end
