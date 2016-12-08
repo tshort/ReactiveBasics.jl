@@ -1,4 +1,4 @@
-using LightReactive
+using ReactiveBasics
 using FactCheck
 
 number() = round(Int, rand()*1000)

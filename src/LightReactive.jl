@@ -1,4 +1,4 @@
-module LightReactive
+module ReactiveBasics
 
 export Signal, value, foldp, subscribe!
 
