@@ -36,10 +36,10 @@ value(text2)
 """
 type Signal{T}
    value::T
-   callbacks::Vector   # usually Functions, but could be other callable types
+   callbacks::Vector{Function}   # usually Functions, but could be other callable types
 end
 
-Signal(val) = Signal(val, Any[])
+Signal(val) = Signal(val, Function[])
 
 """
 The current value of the signal.
@@ -139,7 +139,8 @@ the accumulated value.
     push!(a, 3)        # b == 7
 """
 function foldp(f, v0, us::Signal...)
-    map(x -> v0 = f(v0, x), us...)
+    v0r = Ref(v0)
+    map(x -> v0r[] = f(v0r[], x), us...)
 end
 
 """
