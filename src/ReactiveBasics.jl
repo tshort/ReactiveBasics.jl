@@ -2,8 +2,7 @@ module ReactiveBasics
 
 export Signal, value, foldp, subscribe!
 
-# This API mainly follows that of Reactive.jl. One difference is that `merge` 
-# returns a Tuple of Signals rather than the Signal with the highest precedence.
+# This API mainly follows that of Reactive.jl. 
 
 # The algorithms for were derived from the Swift Interstellar package
 # https://github.com/JensRavens/Interstellar/blob/master/Sources/Signal.swift
@@ -98,26 +97,26 @@ end
 
 
 """
-Merge another signal into the current signal. The value of the signal is a
+Zip (combine) signals into the current signal. The value of the signal is a
 Tuple of the values of the contained signals.
     
-    signal = merge(Signal("Hello"), Signal("World"))
-    value(signal)
+    signal = zip(Signal("Hello"), Signal("World"))
+    value(signal)    # ("Hello", "World")
 """
-function Base.merge(u::Signal, v::Signal)
+function Base.zip(u::Signal, v::Signal)
     signal = Signal((u.value, v.value))
     subscribe!(x -> push!(signal, (x, v.value)), u)
     subscribe!(x -> push!(signal, (u.value, x)), v)
     signal
 end
-function Base.merge(u::Signal, v::Signal, w::Signal)
+function Base.zip(u::Signal, v::Signal, w::Signal)
     signal = Signal((u.value, v.value, w.value))
     subscribe!(x -> push!(signal, (x, v.value, w.value)), u)
     subscribe!(x -> push!(signal, (u.value, x, w.value)), v)
     subscribe!(x -> push!(signal, (u.value, v.value, x)), w)
     signal
 end
-function Base.merge(u::Signal, v::Signal, w::Signal, xs::Signal...)
+function Base.zip(u::Signal, v::Signal, w::Signal, xs::Signal...)
     us = (u,v,w,xs...)
     signal = Signal(((u.value for u in us)...))
     for (i,u) in enumerate(us)

@@ -38,17 +38,17 @@ facts("Basic checks") do
     end
 
 
-    context("merge") do
+    context("zip") do
 
-        ## Merge
+        ## zip
         d = Signal(number())
-        e = merge(d, b, a)
+        e = zip(d, b, a)
         @fact value(e) --> (value(d), value(b), value(a))
 
         push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a))
         
-        e = merge(d, b, a, Signal(3))
+        e = zip(d, b, a, Signal(3))
         push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a), 3)
     end
