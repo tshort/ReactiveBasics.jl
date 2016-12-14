@@ -118,4 +118,22 @@ facts("Basic checks") do
         @fact value(zz)  --> 29
     end
 
+    context("asyncmap") do
+        x = Signal(1)
+        y = asyncmap(-, 0, x)
+
+        @sync push!(x, 2)
+
+        @fact value(y) --> -2
+
+        x = Signal(1)
+        y = asyncmap(0, x) do z
+            sleep(2)
+            -z
+        end
+
+        @sync push!(x, 2)
+
+        @fact value(y) --> -2
+    end
 end
