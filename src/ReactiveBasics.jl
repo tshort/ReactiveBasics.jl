@@ -102,26 +102,8 @@ Tuple of the values of the contained signals.
     signal = zip(Signal("Hello"), Signal("World"))
     value(signal)    # ("Hello", "World")
 """
-function Base.zip(u::Signal, v::Signal)
-    signal = Signal((u.value, v.value))
-    subscribe!(x -> push!(signal, (x, v.value)), u)
-    subscribe!(x -> push!(signal, (u.value, x)), v)
-    signal
-end
-function Base.zip(u::Signal, v::Signal, w::Signal)
-    signal = Signal((u.value, v.value, w.value))
-    subscribe!(x -> push!(signal, (x, v.value, w.value)), u)
-    subscribe!(x -> push!(signal, (u.value, x, w.value)), v)
-    subscribe!(x -> push!(signal, (u.value, v.value, x)), w)
-    signal
-end
-function Base.zip(u::Signal, v::Signal, w::Signal, xs::Signal...)
-    us = (u,v,w,xs...)
-    signal = Signal(((u.value for u in us)...))
-    for (i,u) in enumerate(us)
-        subscribe!(x -> push!(signal, ((i == j ? x : us[j].value for j in 1:length(us))...)), u)
-    end
-    signal
+function Base.zip(u::Signal, us::Signal...)
+    map((args...) -> (args...), u, us...)
 end
 
 """
