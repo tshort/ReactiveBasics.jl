@@ -69,7 +69,6 @@ end
 function Base.map(f, u::Signal, v::Signal, w::Signal, xs::Signal...)
     us = (u,v,w,xs...)
     signal = Signal(f((u.value for u in us)...))
-    @show signal
     for (i,u) in enumerate(us)
         subscribe!(u) do x
             vals = f(((i == j ? x : us[j].value for j in 1:length(us))...)...)
@@ -149,6 +148,18 @@ function Base.filter{T}(f, default::T, u::Signal{T})
     signal = Signal(f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
     signal
+end
+
+"""
+An asynchronous version of `map` that returns a signal that is updated after `f` operates asynchronously.
+The initial value of the returned signal (the `init` arg) must be supplied.
+"""
+function Base.asyncmap(f, init, input::Signal, inputs::Signal...)
+    result = Signal(init)
+    map(input, inputs...) do args...
+        @async push!(result, f(args...))
+    end
+    result
 end
 
 end # module
