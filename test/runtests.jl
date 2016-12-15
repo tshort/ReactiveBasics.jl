@@ -136,4 +136,18 @@ facts("Basic checks") do
 
         @fact value(y) --> -2
     end
+    
+    context("flatmap") do
+
+        a = Signal(1)
+        b = flatmap(a) do x
+            Signal(10 + x)
+        end
+        @fact value(b) --> 11
+        push!(a, 5)
+        @fact value(b) --> 15
+        push!(a, 15)
+        @fact value(b) --> 25
+    end
+
 end
