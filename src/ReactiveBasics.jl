@@ -115,6 +115,18 @@ function Base.zip(u::Signal, us::Signal...)
 end
 
 """
+Merge signals into the current signal. The value of the signal is that from
+the most recent update.
+"""
+function Base.merge(u::Signal, us::Signal...)
+    signal = Signal(u.value)
+    for v in (u, us...)
+        subscribe!(x -> push!(signal, x), v)
+    end
+    signal
+end
+
+"""
 Fold/map over past values. The first argument to the function `f`
 is an accumulated value that the function can operate over, and the 
 second is the current value coming in. `v0` is the initial value of

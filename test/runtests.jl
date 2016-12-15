@@ -36,7 +36,22 @@ facts("Basic checks") do
         push!(b, number())
         @fact value(c) --> value(a) + value(b)
     end
+   
+    context("merge") do
 
+        ## Merge
+        d = Signal(number())
+        e = merge(d, b, a)
+
+        # precedence to d
+        @fact value(e) --> value(d)
+
+        push!(a, number())
+        # Note that his works differently than Reactive.jl because of the 
+        # way updates are pushed.
+        @fact value(e) --> value(a)
+
+    end
 
     context("zip") do
 
