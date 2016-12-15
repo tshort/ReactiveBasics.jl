@@ -1,6 +1,6 @@
 module ReactiveBasics
 
-export Signal, value, foldp, subscribe!
+export Signal, value, foldp, subscribe!, flatmap
 
 # This API mainly follows that of Reactive.jl. 
 
@@ -76,6 +76,14 @@ function Base.map(f, u::Signal, v::Signal, w::Signal, xs::Signal...)
         end
     end
     signal
+end
+
+"""
+Transform the signal into another signal using a function. It's like `map`, 
+but it's meant for functions that return `Signal`s.
+"""
+function flatmap(f, u::Signal)
+    map((x...) -> f(x...).value, u)
 end
 
 """
