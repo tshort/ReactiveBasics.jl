@@ -82,8 +82,8 @@ end
 Transform the signal into another signal using a function. It's like `map`, 
 but it's meant for functions that return `Signal`s.
 """
-function flatmap(f, u::Signal)
-    map((x...) -> f(x...).value, u)
+function flatmap(f, u::Signal, us::Signal...)
+    map((x...) -> f(x...).value, u, us...)
 end
 
 """
