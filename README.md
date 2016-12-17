@@ -9,7 +9,7 @@
 
 This package implements basic functionality for a type of Functional Reactive Programming (FRP). 
 This is a style of DataFlow programming where updates propagate to other objects automatically.
-It follows the same basic API as [Reactive.jl](http://julialang.github.io/Reactive.jl/). 
+It follows the same basic API as [Reactive.jl](http://juliagizmos.github.io/Reactive.jl/). 
 The main difference is that Signals propagate immediately (synchronous operation). There is no event queue.
 The implementation uses closures derived from the approach used in the Swift package [Interstellar](https://github.com/JensRavens/Interstellar).
 The difference in operation makes ReactiveBasics as much as ten times faster than Reactive. 
