@@ -140,7 +140,7 @@ the accumulated value.
 """
 function foldp(f, v0, us::Signal...)
     v0r = Ref(v0)
-    map(x -> v0r[] = f(v0r[], x), us...)
+    map((x...) -> v0r[] = f(v0r[], x...), us...)
 end
 
 """
