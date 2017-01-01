@@ -1,5 +1,7 @@
 module ReactiveBasics
 
+using DocStringExtensions
+
 export Signal, value, foldp, subscribe!, flatmap
 
 # This API mainly follows that of Reactive.jl. 
