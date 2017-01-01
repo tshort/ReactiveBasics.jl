@@ -6,7 +6,7 @@
 
 [![codecov.io](http://codecov.io/github/tshort/ReactiveBasics.jl/coverage.svg?branch=master)](http://codecov.io/github/tshort/ReactiveBasics.jl?branch=master)
 
-
+ 
 This package implements basic functionality for a type of Functional Reactive Programming (FRP). 
 This is a style of DataFlow programming where updates propagate to other objects automatically.
 It follows the same basic API as [Reactive.jl](http://juliagizmos.github.io/Reactive.jl/). 
