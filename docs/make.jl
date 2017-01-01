@@ -1,3 +1,5 @@
+using Documenter, ReactiveBasics
+
 makedocs(
     modules = [ReactiveBasics],
     clean = false,
