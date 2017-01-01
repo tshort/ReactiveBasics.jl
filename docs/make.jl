@@ -17,7 +17,7 @@ makedocs(
 deploydocs(
     repo = "github.com/tshort/ReactiveBasics.jl.git",
     target = "build",
-    julia = "0.5",
+    # julia = "0.5",
     deps = nothing,
     make = nothing,
 )
