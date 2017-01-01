@@ -10,7 +10,7 @@
 This package implements basic functionality for a type of Functional Reactive Programming (FRP). 
 This is a style of DataFlow programming where updates propagate to other objects automatically.
 It follows the same basic API as [Reactive.jl](http://juliagizmos.github.io/Reactive.jl/). 
- 
+
 For more information, see the documentation:
 
 * **[Documentation for the released version](https://tshort.github.io/ReactiveBasics.jl/stable)**.
