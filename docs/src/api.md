@@ -2,7 +2,7 @@
 # ReactiveBasics API
 
 
-```@contents
+```@index
 Pages = ["api.md"]
 ```
 

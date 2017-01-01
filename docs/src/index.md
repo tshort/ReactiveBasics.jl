@@ -14,6 +14,7 @@ When a `Signal` is updated using `push!`, changes propagate to dependent `Signal
 Here is an example taken from Reactive.jl:
 
 ```@repl
+using ReactiveBasics
 x = Signal(0)
 value(x)
 push!(x, 42)
@@ -52,11 +53,12 @@ update in depth-first fashion.
 
 Here is an example that leads to double calculations:
 
-```julia
+```@example
+using ReactiveBasics
 x = Signal(2)
 x2 = map(u -> 2u, x)
 y = map(+, x2, x) 
-subscribe!(u -> println(u), y)
+subscribe!(u -> println("value of y: $u"), y)
 push!(x, 3)
 ```
 

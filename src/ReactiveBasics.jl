@@ -17,8 +17,8 @@ A `Signal` is value that will contain a value in the future.
 The value of the Signal can change at any time.
 
 Use `map` to derive new Signals, `subscribe!` to subscribe to updates of a Signal,
-and `push!` to update the current value of a Signal. `value` returns the current
-value of a Signal.
+and `push!` to update the current value of a Signal. 
+`value` returns the current value of a Signal.
 
 ```julia
 text = Signal("")
