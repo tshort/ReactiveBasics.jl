@@ -1,5 +1,7 @@
 module ReactiveBasics
 
+using DocStringExtensions
+
 export Signal, value, foldp, subscribe!, flatmap
 
 # This API mainly follows that of Reactive.jl. 
@@ -11,12 +13,12 @@ export Signal, value, foldp, subscribe!, flatmap
 
 
 """
-A Signal is value that will contain a value in the future.
-The value of the signal can change at any time.
+A `Signal` is value that will contain a value in the future.
+The value of the Signal can change at any time.
 
-Use `map` to derive new signals, subscribe!` to subscribe to updates of a signal,
-and `push!` to update the current value of a signal. `value` returns the current
-value of a signal.
+Use `map` to derive new Signals, `subscribe!` to subscribe to updates of a Signal,
+and `push!` to update the current value of a Signal. `value` returns the current
+value of a Signal.
 
 ```julia
 text = Signal("")
@@ -41,12 +43,16 @@ end
 Signal(val) = Signal(val, Function[])
 
 """
-The current value of the signal.
+$(SIGNATURES)
+
+The current value of the Signal `u`.
 """
 value(u::Signal) = u.value
 
 """
-Transform the signal into another signal using a function.
+$(SIGNATURES)
+
+Transform the Signal into another Signal using a function.
 """
 function Base.map(f, u::Signal)
     signal = Signal(f(u.value))
@@ -79,7 +85,9 @@ function Base.map(f, u::Signal, v::Signal, w::Signal, xs::Signal...)
 end
 
 """
-Transform the signal into another signal using a function. It's like `map`, 
+$(SIGNATURES)
+
+Transform the Signal into another Signal using a function. It's like `map`, 
 but it's meant for functions that return `Signal`s.
 """
 function flatmap(f, u::Signal, us::Signal...)
@@ -87,7 +95,9 @@ function flatmap(f, u::Signal, us::Signal...)
 end
 
 """
-Update the value of a signal and propagate the change.
+$(SIGNATURES)
+
+Update the value of a Signal and propagate the change.
 """
 function Base.push!(u::Signal, val)
     u.value = val
@@ -95,7 +105,9 @@ function Base.push!(u::Signal, val)
 end
 
 """
-Subscribe to the changes of this signal. Every time the signal is updated, the function `f` runs.
+$(SIGNATURES)
+
+Subscribe to the changes of this Signal. Every time the Signal is updated, the function `f` runs.
 """
 function subscribe!(f, u::Signal)
     push!(u.callbacks, f)
@@ -104,8 +116,10 @@ end
 
 
 """
-Zip (combine) signals into the current signal. The value of the signal is a
-Tuple of the values of the contained signals.
+$(SIGNATURES)
+
+Zip (combine) Signals into the current Signal. The value of the Signal is a
+Tuple of the values of the contained Signals.
     
     signal = zip(Signal("Hello"), Signal("World"))
     value(signal)    # ("Hello", "World")
@@ -115,7 +129,9 @@ function Base.zip(u::Signal, us::Signal...)
 end
 
 """
-Merge signals into the current signal. The value of the signal is that from
+$(SIGNATURES)
+
+Merge Signals into the current Signal. The value of the Signal is that from
 the most recent update.
 """
 function Base.merge(u::Signal, us::Signal...)
@@ -127,6 +143,8 @@ function Base.merge(u::Signal, us::Signal...)
 end
 
 """
+$(SIGNATURES)
+
 Fold/map over past values. The first argument to the function `f`
 is an accumulated value that the function can operate over, and the 
 second is the current value coming in. `v0` is the initial value of
@@ -144,7 +162,7 @@ function foldp(f, v0, us::Signal...)
 end
 
 """
-Return a signal that updates based on the signal `u` if `f(value(u))` evaluates to `true`.
+Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates to `true`.
 """
 function Base.filter{T}(f, default::T, u::Signal{T})
     signal = Signal(f(u.value) ? u.value : default)
@@ -153,8 +171,10 @@ function Base.filter{T}(f, default::T, u::Signal{T})
 end
 
 """
-An asynchronous version of `map` that returns a signal that is updated after `f` operates asynchronously.
-The initial value of the returned signal (the `init` arg) must be supplied.
+$(SIGNATURES)
+
+An asynchronous version of `map` that returns a Signal that is updated after `f` operates asynchronously.
+The initial value of the returned Signal (the `init` arg) must be supplied.
 """
 function Base.asyncmap(f, init, input::Signal, inputs::Signal...)
     result = Signal(init)
