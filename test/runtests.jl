@@ -156,13 +156,13 @@ facts("Basic checks") do
 
         a = Signal(1)
         b = flatmap(a) do x
-            Signal(10 + x)
+            x > 10 ? Signal(1 + x) : Signal(10 + x) 
         end
         @fact value(b) --> 11
         push!(a, 5)
         @fact value(b) --> 15
         push!(a, 15)
-        @fact value(b) --> 25
+        @fact value(b) --> 16
     end
 
     context("sampleon") do
@@ -238,6 +238,16 @@ facts("Basic checks") do
         @fact value(y) --> value(x)
         @fact value(y) --> 20
         @fact value(xx) --> 40
+    end
+
+    context("preserve") do
+        x = Signal(1)
+        z = let xx = map(u -> 2u, x),
+            x2 = preserve(map(u -> 2u, x))
+            map(+, xx, x2)
+        end
+        push!(x, 10)
+        @fact value(z) --> 40
     end
 end
 
