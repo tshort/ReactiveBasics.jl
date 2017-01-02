@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Example",
     "category": "section",
-    "text": "The Signal type holds values that can depend on other Signals.  map(f, xs...) returns a new Signal that depends on one or more Signals xs....  The function f defines the value that the Signal should take as a function of the values of each of the input Signals.  When a Signal is updated using push!, changes propagate to dependent Signals.  Here is an example taken from Reactive.jl:using ReactiveBasics\nx = Signal(0)\nvalue(x)\npush!(x, 42)\nvalue(x)\nxsquared = map(a -> a*a, x)\nvalue(xsquared)\npush!(x, 3)\nvalue(xsquared)Various utility functions are available to manipulate signals, including:subscribe! – Subscribe to the changes of a Signal. \nmerge – Combine Signals.\nzip – Combine Signals as a Tuple.\nfilter – A Signal filtered based on a function.\nfoldp – Fold/map over past values.\nflatmap – Like map, but it's meant for functions that return Signals.\nasyncmap – Like map, but it updates asynchronously."
+    "text": "The Signal type holds values that can depend on other Signals.  map(f, xs...) returns a new Signal that depends on one or more Signals xs....  The function f defines the value that the Signal should take as a function of the values of each of the input Signals.  When a Signal is updated using push!, changes propagate to dependent Signals.  Here is an example taken from Reactive.jl:using ReactiveBasics\nx = Signal(0)\nvalue(x)\npush!(x, 42)\nvalue(x)\nxsquared = map(a -> a*a, x)\nvalue(xsquared)\npush!(x, 3)\nvalue(xsquared)Various utility functions are available to manipulate signals, including:subscribe! – Subscribe to the changes of a Signal. \nmerge – Combine Signals.\nzip – Combine Signals as a Tuple.\nfilter – A Signal filtered based on a function.\nfoldp – Fold/map over past values.\nflatmap – Like map, but it's meant for functions that return Signals.\nasyncmap – Like map, but it updates asynchronously.\nflatten – Flatten a Signal of Signals.\nbind! – Bind two Signals, so that updates to one are synchronized with the other.\ndroprepeats – Drop repeats in the input Signal.\nprevious – A Signal with the previous value of the input Signal.\nsampleon – Sample one Signal when another changes.\npreserve – No-op for compatibility with Reactive."
 },
 
 {
@@ -65,11 +65,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#ReactiveBasics.flatmap-Tuple{Any,ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N}}",
+    "location": "api.html#ReactiveBasics.bind!-Tuple{ReactiveBasics.Signal,ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.bind!",
+    "category": "Method",
+    "text": "bind!(a, b)\n\n\nFor every update to a also update b with the same value and vice-versa. Initially update a with the value in b.\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.droprepeats-Tuple{ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.droprepeats",
+    "category": "Method",
+    "text": "droprepeats(input)\n\n\nDrop updates to input whenever the new value is the same as the previous value of the Signal.\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.flatmap-Tuple{Any,ReactiveBasics.Signal}",
     "page": "API",
     "title": "ReactiveBasics.flatmap",
     "category": "Method",
-    "text": "flatmap(f, u, us)\n\n\nTransform the Signal into another Signal using a function. It's like map,  but it's meant for functions that return Signals.\n\n\n\n"
+    "text": "flatmap(f, input)\n\n\nTransform the Signal into another Signal using a function. It's like map,  but it's meant for functions that return Signals.\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.flatten-Tuple{ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.flatten",
+    "category": "Method",
+    "text": "flatten(input)\n\n\nFlatten a Signal of Signals into a Signal which holds the value of the current Signal. \n\n\n\n"
 },
 
 {
@@ -78,6 +102,30 @@ var documenterSearchIndex = {"docs": [
     "title": "ReactiveBasics.foldp",
     "category": "Method",
     "text": "foldp(f, v0, us)\n\n\nFold/map over past values. The first argument to the function f is an accumulated value that the function can operate over, and the  second is the current value coming in. v0 is the initial value of the accumulated value.\n\na = Signal(2)\n# accumulate sums coming in from a, starting at zero\nb = foldp(+, 0, a) # b == 2\npush!(a, 2)        # b == 4\npush!(a, 3)        # b == 7\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.preserve-Tuple{ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.preserve",
+    "category": "Method",
+    "text": "preserve(x)\n\n\nFor compatibility with Reactive.  It just returns the original Signal because this isn't needed with direct push! updates.\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.previous",
+    "page": "API",
+    "title": "ReactiveBasics.previous",
+    "category": "Function",
+    "text": "previous(input)\nprevious(input, default)\n\n\nCreate a Signal which holds the previous value of input. You can optionally specify a different initial value.\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.sampleon-Tuple{ReactiveBasics.Signal,ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.sampleon",
+    "category": "Method",
+    "text": "sampleon(a, b)\n\n\nSample the value of b whenever a updates.\n\n\n\n"
 },
 
 {
@@ -142,6 +190,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.push!",
     "category": "Method",
     "text": "push!(u, val)\n\n\nUpdate the value of a Signal and propagate the change.\n\n\n\n"
+},
+
+{
+    "location": "api.html#ReactiveBasics.unsubscribe!-Tuple{Any,ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.unsubscribe!",
+    "category": "Method",
+    "text": "unsubscribe!(f, u)\n\n\nUnsubscribe to the changes of this Signal. \n\n\n\n"
 },
 
 {
