@@ -155,12 +155,15 @@ facts("Basic checks") do
     context("flatmap") do
 
         a = Signal(1)
+        u = Signal(3)
         b = flatmap(a) do x
-            x > 10 ? Signal(1 + x) : Signal(10 + x) 
+            x > 10 ? Signal(1 + x) : u
         end
-        @fact value(b) --> 11
+        @fact value(b) --> 3
         push!(a, 5)
-        @fact value(b) --> 15
+        @fact value(b) --> 3
+        push!(u, 6)
+        @fact value(b) --> 6
         push!(a, 15)
         @fact value(b) --> 16
     end
