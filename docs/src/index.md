@@ -34,7 +34,12 @@ Various utility functions are available to manipulate signals, including:
 - [`foldp`](@ref) -- Fold/map over past values.
 - [`flatmap`](@ref) -- Like `map`, but it's meant for functions that return `Signal`s.
 - [`asyncmap`](@ref) -- Like `map`, but it updates asynchronously.
-
+- [`flatten`](@def) -- Flatten a Signal of Signals.
+- [`bind!`](@def) -- Bind two Signals, so that updates to one are synchronized with the other.
+- [`droprepeats`](@def) -- Drop repeats in the input Signal.
+- [`previous`](@def) -- A Signal with the previous value of the input Signal.
+- [`sampleon`](@def) -- Sample one Signal when another changes.
+- [`preserve`](@def) -- No-op for compatibility with Reactive.
 
 ## Change propagation
 

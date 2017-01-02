@@ -155,14 +155,146 @@ facts("Basic checks") do
     context("flatmap") do
 
         a = Signal(1)
+        u = Signal(3)
         b = flatmap(a) do x
-            Signal(10 + x)
+            x > 10 ? Signal(1 + x) : u
         end
-        @fact value(b) --> 11
+        @fact value(b) --> 3
         push!(a, 5)
-        @fact value(b) --> 15
+        @fact value(b) --> 3
+        push!(u, 6)
+        @fact value(b) --> 6
         push!(a, 15)
-        @fact value(b) --> 25
+        @fact value(b) --> 16
     end
 
+    context("sampleon") do
+        # sampleon
+        g = Signal(0)
+
+        push!(g, number())
+        i = Signal(true)
+        j = sampleon(i, g)
+        # default value
+        @fact value(j) --> value(g)
+        push!(g, value(g)-1)
+        @fact value(j) --> value(g)+1
+        push!(i, true)
+        @fact value(j) --> value(g)
+    end
+
+    context("droprepeats") do
+        # droprepeats
+        count = s -> foldp((x, y) -> x+1, -1, s)
+
+        k = Signal(1)
+        l = droprepeats(k)
+
+        @fact value(l) --> value(k)
+        push!(k, 1)
+        @fact value(l) --> value(k)
+        push!(k, 0)
+        #println(l.value, " ", value(k))
+        @fact value(l) --> value(k)
+
+        m = count(k)
+        n = count(l)
+
+        seq = [1, 1, 1, 0, 1, 0, 1, 0, 0]
+        map(x -> push!(k, x), seq)
+
+        @fact value(m) --> length(seq)
+        @fact value(n) --> 6
+    end
+
+    context("previous") do
+        x = Signal(0)
+        y = previous(x)
+        @fact value(y) --> 0
+
+        push!(x, 1)
+
+        @fact value(y) --> 0
+
+        push!(x, 2)
+
+        @fact value(y) --> 1
+
+        push!(x, 3)
+
+        @fact value(y) --> 2
+    end
+   
+    context("bind!") do
+        x = Signal(1)
+        y = Signal(2)
+        xx = map(u -> 2u, x)
+        yy = map(u -> 3u, y)
+        bind!(x, y)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 2
+        push!(x, 10)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 10
+        @fact value(yy) --> 30
+        push!(y, 20)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 20
+        @fact value(xx) --> 40
+    end
+
+    context("preserve") do
+        x = Signal(1)
+        z = let xx = map(u -> 2u, x),
+            x2 = preserve(map(u -> 2u, x))
+            map(+, xx, x2)
+        end
+        push!(x, 10)
+        @fact value(z) --> 40
+    end
 end
+
+facts("Flatten") do
+
+    a = Signal(0)
+    b = Signal(1)
+
+    c = Signal(a)
+
+    d = flatten(c)
+    cnt = foldp((x, y) -> x+1, -1, d)
+
+    context("Signal{Signal} -> flat Signal") do
+        # Flatten implies:
+        @fact value(c) --> a
+        @fact value(d) --> value(a)
+    end
+
+    context("Initial update count") do
+
+        @fact value(cnt) --> 0
+    end
+
+    context("Current signal updates") do
+        push!(a, 2)
+
+        @fact value(cnt) --> 1
+        @fact value(d) --> value(a)
+    end
+
+    context("Signal swap") do
+        push!(c, b)
+        @fact value(cnt) --> 2
+        @fact value(d) --> value(b)
+
+        push!(a, 3)
+        @fact value(cnt) --> 2
+        @fact value(d) --> value(b)
+
+        push!(b, 3)
+
+        @fact value(cnt) --> 3
+        @fact value(d) --> value(b)
+    end
+end
+
