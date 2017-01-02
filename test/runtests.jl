@@ -204,7 +204,7 @@ facts("Basic checks") do
         @fact value(n) --> 6
     end
 
-   context("previous") do
+    context("previous") do
         x = Signal(0)
         y = previous(x)
         @fact value(y) --> 0
@@ -220,6 +220,24 @@ facts("Basic checks") do
         push!(x, 3)
 
         @fact value(y) --> 2
+    end
+   
+    context("bind!") do
+        x = Signal(1)
+        y = Signal(2)
+        xx = map(u -> 2u, x)
+        yy = map(u -> 3u, y)
+        bind!(x, y)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 2
+        push!(x, 10)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 10
+        @fact value(yy) --> 30
+        push!(y, 20)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 20
+        @fact value(xx) --> 40
     end
 end
 

@@ -227,8 +227,10 @@ end
 $(SIGNATURES)
 
 For every update to `a` also update `b` with the same value and vice-versa.
+Initially update `a` with the value in `b`.
 """
 function bind!(a::Signal, b::Signal)
+    push!(a, b.value)
     subscribe!(u -> u != value(b) && push!(b, u), a)
     subscribe!(u -> u != value(a) && push!(a, u), b)
 end
