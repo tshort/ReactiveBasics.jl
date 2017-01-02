@@ -165,4 +165,105 @@ facts("Basic checks") do
         @fact value(b) --> 25
     end
 
+    context("sampleon") do
+        # sampleon
+        g = Signal(0)
+
+        push!(g, number())
+        i = Signal(true)
+        j = sampleon(i, g)
+        # default value
+        @fact value(j) --> value(g)
+        push!(g, value(g)-1)
+        @fact value(j) --> value(g)+1
+        push!(i, true)
+        @fact value(j) --> value(g)
+    end
+
+    context("droprepeats") do
+        # droprepeats
+        count = s -> foldp((x, y) -> x+1, -1, s)
+
+        k = Signal(1)
+        l = droprepeats(k)
+
+        @fact value(l) --> value(k)
+        push!(k, 1)
+        @fact value(l) --> value(k)
+        push!(k, 0)
+        #println(l.value, " ", value(k))
+        @fact value(l) --> value(k)
+
+        m = count(k)
+        n = count(l)
+
+        seq = [1, 1, 1, 0, 1, 0, 1, 0, 0]
+        map(x -> push!(k, x), seq)
+
+        @fact value(m) --> length(seq)
+        @fact value(n) --> 6
+    end
+
+   context("previous") do
+        x = Signal(0)
+        y = previous(x)
+        @fact value(y) --> 0
+
+        push!(x, 1)
+
+        @fact value(y) --> 0
+
+        push!(x, 2)
+
+        @fact value(y) --> 1
+
+        push!(x, 3)
+
+        @fact value(y) --> 2
+    end
 end
+
+facts("Flatten") do
+
+    a = Signal(0)
+    b = Signal(1)
+
+    c = Signal(a)
+
+    d = flatten(c)
+    cnt = foldp((x, y) -> x+1, -1, d)
+
+    context("Signal{Signal} -> flat Signal") do
+        # Flatten implies:
+        @fact value(c) --> a
+        @fact value(d) --> value(a)
+    end
+
+    context("Initial update count") do
+
+        @fact value(cnt) --> 0
+    end
+
+    context("Current signal updates") do
+        push!(a, 2)
+
+        @fact value(cnt) --> 1
+        @fact value(d) --> value(a)
+    end
+
+    context("Signal swap") do
+        push!(c, b)
+        @fact value(cnt) --> 2
+        @fact value(d) --> value(b)
+
+        push!(a, 3)
+        @fact value(cnt) --> 2
+        @fact value(d) --> value(b)
+
+        push!(b, 3)
+
+        @fact value(cnt) --> 3
+        @fact value(d) --> value(b)
+    end
+end
+

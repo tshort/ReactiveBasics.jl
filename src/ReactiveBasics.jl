@@ -2,7 +2,7 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, flatmap
+export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve
 
 # This API mainly follows that of Reactive.jl. 
 
@@ -90,8 +90,16 @@ $(SIGNATURES)
 Transform the Signal into another Signal using a function. It's like `map`, 
 but it's meant for functions that return `Signal`s.
 """
-function flatmap(f, u::Signal, us::Signal...)
-    map((x...) -> f(x...).value, u, us...)
+function flatmap(f, input::Signal)
+    signal = Signal(f(input.value).value)
+    subscribe!(input) do u
+        innersig = f(u)
+        push!(signal, innersig.value)
+        subscribe!(innersig) do v
+            push!(signal, v)
+        end
+    end      
+    signal
 end
 
 """
@@ -112,6 +120,15 @@ Subscribe to the changes of this Signal. Every time the Signal is updated, the f
 function subscribe!(f, u::Signal)
     push!(u.callbacks, f)
     u
+end
+
+"""
+$(SIGNATURES)
+
+Unsubscribe to the changes of this Signal. 
+"""
+function unsubscribe!(f, u::Signal)
+    u.callbacks = filter(a -> a != f, u.callbacks)
 end
 
 
@@ -183,5 +200,86 @@ function Base.asyncmap(f, init, input::Signal, inputs::Signal...)
     end
     result
 end
+
+"""
+$(SIGNATURES)
+
+Flatten a Signal of Signals into a Signal which holds the
+value of the current Signal. 
+"""
+function flatten(input::Signal)
+    sigref = Ref(input.value)
+    signal = Signal(input.value.value)
+    updater = u -> push!(signal, u)
+    subscribe!(updater, input.value)
+    subscribe!(input) do u
+        push!(signal, u.value)
+        unsubscribe!(updater, sigref[])
+        subscribe!(updater, u)
+        sigref[] = u
+    end    
+    push!(input, input.value)  
+    signal
+end
+
+
+"""
+$(SIGNATURES)
+
+For every update to `a` also update `b` with the same value and vice-versa.
+"""
+function bind!(a::Signal, b::Signal)
+    subscribe!(u -> u != value(b) && push!(b, u), a)
+    subscribe!(u -> u != value(a) && push!(a, u), b)
+end
+
+"""
+$(SIGNATURES)
+
+Drop updates to `input` whenever the new value is the same
+as the previous value of the Signal.
+"""
+function droprepeats(input::Signal)
+    result = Signal(value(input))
+    subscribe!(u -> u != value(result) && push!(result, u), input)
+    result
+end
+
+"""
+$(SIGNATURES)
+
+Create a Signal which holds the previous value of `input`.
+You can optionally specify a different initial value.
+"""
+function previous(input::Signal, default=value(input))
+    past = Ref(default)
+    map(input) do u
+        res = past[]
+        past[] = u
+        res
+    end
+end
+
+"""
+$(SIGNATURES)
+
+Sample the value of `b` whenever `a` updates.
+"""
+function sampleon(a::Signal, b::Signal)
+    result = Signal(value(b))
+    subscribe!(u -> push!(result, value(b)), a)
+    result
+end
+
+"""
+$(SIGNATURES)
+
+For compatibility with Reactive. 
+It just returns the original Signal because this isn't needed with direct `push!` updates.
+"""
+function preserve(x::Signal)
+    x
+end
+
 
 end # module
