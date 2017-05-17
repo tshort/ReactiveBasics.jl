@@ -97,7 +97,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#ReactiveBasics.foldp-Tuple{Any,Any,Vararg{ReactiveBasics.Signal,N}}",
+    "location": "api.html#ReactiveBasics.foldp-Tuple{Any,Any,Vararg{ReactiveBasics.Signal,N} where N}",
     "page": "API",
     "title": "ReactiveBasics.foldp",
     "category": "Method",
@@ -145,7 +145,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#Base.Iterators.zip-Tuple{ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N}}",
+    "location": "api.html#Base.Iterators.zip-Tuple{ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N} where N}",
     "page": "API",
     "title": "Base.Iterators.zip",
     "category": "Method",
@@ -153,7 +153,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#Base.asyncmap-Tuple{Any,Any,ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N}}",
+    "location": "api.html#Base.asyncmap-Tuple{Any,Any,ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N} where N}",
     "page": "API",
     "title": "Base.asyncmap",
     "category": "Method",
@@ -161,7 +161,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#Base.filter-Tuple{Any,T,ReactiveBasics.Signal{T}}",
+    "location": "api.html#Base.filter-Union{Tuple{Any,T,ReactiveBasics.Signal{T}}, Tuple{T}} where T",
     "page": "API",
     "title": "Base.filter",
     "category": "Method",
@@ -177,7 +177,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#Base.merge-Tuple{ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N}}",
+    "location": "api.html#Base.merge-Tuple{ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N} where N}",
     "page": "API",
     "title": "Base.merge",
     "category": "Method",
