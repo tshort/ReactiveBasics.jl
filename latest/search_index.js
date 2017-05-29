@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.previous",
     "category": "Function",
-    "text": "previous(input)\nprevious(input, default)\n\n\nCreate a Signal which holds the previous value of input. You can optionally specify a different initial value.\n\n\n\n"
+    "text": "previous(input, default)\nprevious(input)\n\n\nCreate a Signal which holds the previous value of input. You can optionally specify a different initial value.\n\n\n\n"
 },
 
 {
