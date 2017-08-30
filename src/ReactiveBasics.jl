@@ -188,7 +188,11 @@ the accumulated value.
 """
 function foldp(f, v0, us::Signal...)
     v0r = Ref(v0)
-    map((x...) -> v0r[] = f(v0r[], x...), us...)
+    if isa(v0r, Base.RefArray)
+        map((x...) -> v0r.x[:] = f(v0r.x, x...), us...)
+    else
+        map((x...) -> v0r[] = f(v0r.x, x...), us...)
+    end
 end
 
 """
@@ -227,9 +231,13 @@ function flatten(input::Signal)
     subscribe!(updater, input.value)
     subscribe!(input) do u
         push!(signal, u.value)
-        unsubscribe!(updater, sigref[])
+        unsubscribe!(updater, sigref.x)
         subscribe!(updater, u)
-        sigref[] = u
+        if isa(sigref, Base.RefArray)
+            sigref.x[:] = u
+        else
+            sigref[] = u
+        end
     end
     push!(input, input.value)
     signal
@@ -269,8 +277,12 @@ You can optionally specify a different initial value.
 function previous(input::Signal, default=value(input))
     past = Ref(default)
     map(input) do u
-        res = past[]
-        past[] = u
+        res = deepcopy(past.x)
+        if isa(past, Base.RefArray)
+            past.x[:] = u
+        else
+            past[] = u
+        end
         res
     end
 end
