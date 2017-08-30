@@ -4,7 +4,7 @@ using DocStringExtensions
 
 export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve
 
-# This API mainly follows that of Reactive.jl. 
+# This API mainly follows that of Reactive.jl.
 
 # The algorithms for were derived from the Swift Interstellar package
 # https://github.com/JensRavens/Interstellar/blob/master/Sources/Signal.swift
@@ -17,7 +17,7 @@ A `Signal` is value that will contain a value in the future.
 The value of the Signal can change at any time.
 
 Use `map` to derive new Signals, `subscribe!` to subscribe to updates of a Signal,
-and `push!` to update the current value of a Signal. 
+and `push!` to update the current value of a Signal.
 `value` returns the current value of a Signal.
 
 ```julia
@@ -87,7 +87,7 @@ end
 """
 $(SIGNATURES)
 
-Transform the Signal into another Signal using a function. It's like `map`, 
+Transform the Signal into another Signal using a function. It's like `map`,
 but it's meant for functions that return `Signal`s.
 """
 function flatmap(f, input::Signal)
@@ -98,7 +98,7 @@ function flatmap(f, input::Signal)
         subscribe!(innersig) do v
             push!(signal, v)
         end
-    end      
+    end
     signal
 end
 
@@ -125,7 +125,7 @@ end
 """
 $(SIGNATURES)
 
-Unsubscribe to the changes of this Signal. 
+Unsubscribe to the changes of this Signal.
 """
 function unsubscribe!(f, u::Signal)
     u.callbacks = filter(a -> a != f, u.callbacks)
@@ -137,7 +137,7 @@ $(SIGNATURES)
 
 Zip (combine) Signals into the current Signal. The value of the Signal is a
 Tuple of the values of the contained Signals.
-    
+
     signal = zip(Signal("Hello"), Signal("World"))
     value(signal)    # ("Hello", "World")
 """
@@ -163,7 +163,7 @@ end
 $(SIGNATURES)
 
 Fold/map over past values. The first argument to the function `f`
-is an accumulated value that the function can operate over, and the 
+is an accumulated value that the function can operate over, and the
 second is the current value coming in. `v0` is the initial value of
 the accumulated value.
 
@@ -175,7 +175,11 @@ the accumulated value.
 """
 function foldp(f, v0, us::Signal...)
     v0r = Ref(v0)
-    map((x...) -> v0r[] = f(v0r[], x...), us...)
+    if isa(v0r, Base.RefArray)
+        map((x...) -> v0r.x[:] = f(v0r.x, x...), us...)
+    else
+        map((x...) -> v0r[] = f(v0r.x, x...), us...)
+    end
 end
 
 """
@@ -205,7 +209,7 @@ end
 $(SIGNATURES)
 
 Flatten a Signal of Signals into a Signal which holds the
-value of the current Signal. 
+value of the current Signal.
 """
 function flatten(input::Signal)
     sigref = Ref(input.value)
@@ -214,11 +218,15 @@ function flatten(input::Signal)
     subscribe!(updater, input.value)
     subscribe!(input) do u
         push!(signal, u.value)
-        unsubscribe!(updater, sigref[])
+        unsubscribe!(updater, sigref.x)
         subscribe!(updater, u)
-        sigref[] = u
-    end    
-    push!(input, input.value)  
+        if isa(sigref, Base.RefArray)
+            sigref.x[:] = u
+        else
+            sigref[] = u
+        end
+    end
+    push!(input, input.value)
     signal
 end
 
@@ -256,8 +264,12 @@ You can optionally specify a different initial value.
 function previous(input::Signal, default=value(input))
     past = Ref(default)
     map(input) do u
-        res = past[]
-        past[] = u
+        res = deepcopy(past.x)
+        if isa(past, Base.RefArray)
+            past.x[:] = u
+        else
+            past[] = u
+        end
         res
     end
 end
@@ -276,7 +288,7 @@ end
 """
 $(SIGNATURES)
 
-For compatibility with Reactive. 
+For compatibility with Reactive.
 It just returns the original Signal because this isn't needed with direct `push!` updates.
 """
 function preserve(x::Signal)
