@@ -36,7 +36,7 @@ facts("Basic checks") do
         push!(b, number())
         @fact value(c) --> value(a) + value(b)
     end
-   
+
     context("merge") do
 
         ## Merge
@@ -47,7 +47,7 @@ facts("Basic checks") do
         @fact value(e) --> value(d)
 
         push!(a, number())
-        # Note that his works differently than Reactive.jl because of the 
+        # Note that his works differently than Reactive.jl because of the
         # way updates are pushed.
         @fact value(e) --> value(a)
 
@@ -57,14 +57,25 @@ facts("Basic checks") do
 
         ## zip
         d = Signal(number())
+        b = Signal(number())
+        a = Signal(number())
         e = zip(d, b, a)
         @fact value(e) --> (value(d), value(b), value(a))
 
-        push!(a, number())
-        @fact value(e) --> (value(d), value(b), value(a))
-        
+        d = Signal(1)
+        b = Signal(2)
+        a = Signal(3)
+        e = zip(d, b, a)
+        @fact value(e) --> (1,2,3)
+
+        push!(a, 6)
+        @fact value(e) --> (1,2,3)
+        push!(d, 4)
+        @fact value(e) --> (1,2,3)
+        push!(b, 5)
+        @fact value(e) --> (4,5,6)
+
         e = zip(d, b, a, Signal(3))
-        push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a), 3)
     end
 
@@ -73,10 +84,16 @@ facts("Basic checks") do
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
-        nums = round(Int, rand(100)*1000)
+        nums = round.(Int, rand(100)*1000)
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
+
+        x = Signal(ones(4,5))
+        y = foldp((b,a) -> b + a, ones(4,5) * 2, x)
+        @fact value(y) --> ones(4,5) * 3
+        push!(x, ones(4,5))
+        @fact value(y) --> ones(4,5) * 4
     end
 
     context("filter") do
@@ -151,7 +168,7 @@ facts("Basic checks") do
 
         @fact value(y) --> -2
     end
-    
+
     context("flatmap") do
 
         a = Signal(1)
@@ -223,8 +240,24 @@ facts("Basic checks") do
         push!(x, 3)
 
         @fact value(y) --> 2
+
+        x = Signal(zeros(2,3))
+        y = previous(x)
+        @fact value(y) --> zeros(2,3)
+
+        push!(x, ones(2,3))
+
+        @fact value(y) --> zeros(2,3)
+
+        push!(x, ones(2,3) * 2)
+
+        @fact value(y) --> ones(2,3)
+
+        push!(x, ones(2,3) * 3)
+
+        @fact value(y) --> ones(2,3) * 2
     end
-   
+
     context("bind!") do
         x = Signal(1)
         y = Signal(2)
@@ -297,4 +330,3 @@ facts("Flatten") do
         @fact value(d) --> value(b)
     end
 end
-
