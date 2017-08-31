@@ -2,7 +2,7 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve
+export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve, filterwhen
 
 # This API mainly follows that of Reactive.jl.
 
@@ -187,7 +187,7 @@ the accumulated value.
     push!(a, 3)        # b == 7
 """
 function foldp(f, v0, us::Signal...)
-    v0r = Ref(v0)
+    v0r = Base.RefValue(v0)
     map((x...) -> v0r[] = f(v0r[], x...), us...)
 end
 
@@ -197,6 +197,19 @@ Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates 
 function Base.filter{T}(f, default::T, u::Signal{T})
     signal = Signal(f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
+    signal
+end
+
+"""
+$(SIGNATURES)
+
+Keep updates to `input` only when `switch` is true.
+If switch is false initially, the specified default value is used.
+"""
+function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
+    signal = Signal(predicate.value ? u.value : default)
+    subscribe!(result -> predicate.value && push!(signal, result), u)
+    subscribe!(v -> v && push!(signal, u.value), predicate)
     signal
 end
 
@@ -221,7 +234,7 @@ Flatten a Signal of Signals into a Signal which holds the
 value of the current Signal.
 """
 function flatten(input::Signal)
-    sigref = Ref(input.value)
+    sigref = Base.RefValue(input.value)
     signal = Signal(input.value.value)
     updater = u -> push!(signal, u)
     subscribe!(updater, input.value)
@@ -267,7 +280,7 @@ Create a Signal which holds the previous value of `input`.
 You can optionally specify a different initial value.
 """
 function previous(input::Signal, default=value(input))
-    past = Ref(default)
+    past = Base.RefValue(default)
     map(input) do u
         res = past[]
         past[] = u

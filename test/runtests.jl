@@ -88,6 +88,12 @@ facts("Basic checks") do
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
+
+        x = Signal(ones(4,5))
+        y = foldp((b,a) -> b + a, ones(4,5) * 2, x)
+        @fact value(y) --> ones(4,5) * 3
+        push!(x, ones(4,5))
+        @fact value(y) --> ones(4,5) * 4
     end
 
     context("filter") do
@@ -105,6 +111,28 @@ facts("Basic checks") do
 
         push!(g, 3)
         @fact value(h) --> 3
+    end
+
+    context("filterwhen") do
+        # filterwhen
+        bs = Signal(false)
+        as = Signal(1)
+        cs = filterwhen(bs, 9, as)
+        @fact value(cs) --> 9
+
+        bs = Signal(true)
+        as = Signal(1)
+        cs = filterwhen(bs, 9, as)
+        @fact value(cs) --> 1
+
+        push!(as, 2)
+        @fact value(cs) --> 2
+        push!(bs, false)
+        @fact value(cs) --> 2
+        push!(as, 5)
+        @fact value(cs) --> 2
+        push!(bs, true)
+        @fact value(cs) --> 5
     end
 
     context("push! inside push!") do
@@ -234,6 +262,22 @@ facts("Basic checks") do
         push!(x, 3)
 
         @fact value(y) --> 2
+
+        x = Signal(zeros(2,3))
+        y = previous(x)
+        @fact value(y) --> zeros(2,3)
+
+        push!(x, ones(2,3))
+
+        @fact value(y) --> zeros(2,3)
+
+        push!(x, ones(2,3) * 2)
+
+        @fact value(y) --> ones(2,3)
+
+        push!(x, ones(2,3) * 3)
+
+        @fact value(y) --> ones(2,3) * 2
     end
 
     context("bind!") do
