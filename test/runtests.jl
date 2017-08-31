@@ -37,6 +37,21 @@ facts("Basic checks") do
         @fact value(c) --> value(a) + value(b)
     end
 
+    context("zipmap") do
+
+        as = Signal(1)
+        bs = map(a -> a * 0.1, as)
+        cs = zipmap((a,b) -> a + b, as, bs)
+        counts = foldp((cnt,_) -> cnt + 1, 0, cs)
+
+        @fact value(counts) --> 1
+        @fact value(cs) --> 1.1
+
+        push!(as, 2)
+        @fact value(counts) --> 2
+        @fact value(cs) --> 2.2
+    end
+
     context("merge") do
 
         ## Merge
@@ -84,11 +99,7 @@ facts("Basic checks") do
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
-<<<<<<< HEAD
         nums = rand(Int, 100)
-=======
-        nums = round.(Int, rand(100)*1000)
->>>>>>> c355bd628871a00d8f09037788be46bc2e3f5508
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)

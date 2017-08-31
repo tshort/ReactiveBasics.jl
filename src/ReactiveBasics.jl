@@ -2,7 +2,7 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve, filterwhen
+export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve, filterwhen, zipmap
 
 # This API mainly follows that of Reactive.jl.
 
@@ -99,6 +99,24 @@ function flatmap(f, input::Signal)
             push!(signal, v)
         end
     end
+    signal
+end
+
+"""
+$(SIGNATURES)
+
+Zips given signals first and then applys the map function onto the
+zipped value. This allows to omit the double calculation when using map.
+
+    as = Signal(1)
+    bs = map(a -> a * 0.1, as)
+    cs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for
+    # every change in Signal as
+"""
+function zipmap(f, u::Signal, us::Signal...)
+    zipped_signal = zip(u, us...)
+    signal = Signal(f(zipped_signal.value...))
+    subscribe!(x -> push!(signal, f(x...)), zipped_signal)
     signal
 end
 
