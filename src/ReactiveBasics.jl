@@ -142,7 +142,20 @@ Tuple of the values of the contained Signals.
     value(signal)    # ("Hello", "World")
 """
 function Base.zip(u::Signal, us::Signal...)
-    map((args...) -> (args...), u, us...)
+    signals = (u,us...)
+    signal = Signal(map(u -> value(u), signals))
+    pasts = collect(map(u -> Array{typeof(value(u)), 1}(0), signals))
+    for i in 1:length(signals)
+        subscribe!(signals[i]) do u
+            push!(pasts[i], u)
+            not_empty_pasts = map(!isempty, pasts)
+            if all(not_empty_pasts)
+                zip_vals = map(shift!, pasts)
+                push!(signal, (zip_vals...))
+            end
+        end
+    end
+    signal
 end
 
 """

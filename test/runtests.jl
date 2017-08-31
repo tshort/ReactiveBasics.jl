@@ -57,14 +57,25 @@ facts("Basic checks") do
 
         ## zip
         d = Signal(number())
+        b = Signal(number())
+        a = Signal(number())
         e = zip(d, b, a)
         @fact value(e) --> (value(d), value(b), value(a))
 
-        push!(a, number())
-        @fact value(e) --> (value(d), value(b), value(a))
+        d = Signal(1)
+        b = Signal(2)
+        a = Signal(3)
+        e = zip(d, b, a)
+        @fact value(e) --> (1,2,3)
+
+        push!(a, 6)
+        @fact value(e) --> (1,2,3)
+        push!(d, 4)
+        @fact value(e) --> (1,2,3)
+        push!(b, 5)
+        @fact value(e) --> (4,5,6)
 
         e = zip(d, b, a, Signal(3))
-        push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a), 3)
     end
 
@@ -73,7 +84,7 @@ facts("Basic checks") do
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
-        nums = round(Int, rand(100)*1000)
+        nums = rand(Int, 100)
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
