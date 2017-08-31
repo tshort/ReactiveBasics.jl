@@ -153,6 +153,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#ReactiveBasics.zipmap-Tuple{Any,ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N} where N}",
+    "page": "API",
+    "title": "ReactiveBasics.zipmap",
+    "category": "Method",
+    "text": "zipmap(f, u, us)\n\n\nZips given signals first and then applys the map function onto the zipped value. This allows to omit the double calculation when using map.\n\nas = Signal(1)\nbs = map(a -> a * 0.1, as)\ncs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for\n# every change in Signal as\n\n\n\n"
+},
+
+{
     "location": "api.html#Base.Iterators.zip-Tuple{ReactiveBasics.Signal,Vararg{ReactiveBasics.Signal,N} where N}",
     "page": "API",
     "title": "Base.Iterators.zip",
