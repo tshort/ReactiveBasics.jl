@@ -77,6 +77,12 @@ facts("Basic checks") do
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
+
+        x = Signal(ones(4,5))
+        y = foldp((b,a) -> b + a, ones(4,5) * 2, x)
+        @fact value(y) --> ones(4,5) * 3
+        push!(x, ones(4,5))
+        @fact value(y) --> ones(4,5) * 4
     end
 
     context("filter") do
@@ -223,6 +229,22 @@ facts("Basic checks") do
         push!(x, 3)
 
         @fact value(y) --> 2
+
+        x = Signal(zeros(2,3))
+        y = previous(x)
+        @fact value(y) --> zeros(2,3)
+
+        push!(x, ones(2,3))
+
+        @fact value(y) --> zeros(2,3)
+
+        push!(x, ones(2,3) * 2)
+
+        @fact value(y) --> ones(2,3)
+
+        push!(x, ones(2,3) * 3)
+
+        @fact value(y) --> ones(2,3) * 2
     end
    
     context("bind!") do
