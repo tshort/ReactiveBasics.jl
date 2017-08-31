@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.Signal",
     "category": "Type",
-    "text": "A Signal is value that will contain a value in the future. The value of the Signal can change at any time.\n\nUse map to derive new Signals, subscribe! to subscribe to updates of a Signal, and push! to update the current value of a Signal.  value returns the current value of a Signal.\n\ntext = Signal(\"\")\n\ntext2 = map(s -> \"Bye $s\", text)\n\nsubscribe!(text) do s\n    println(\"Hello $s\")\nend\n\npush!(text, \"world\")\n\nvalue(text)\nvalue(text2)\n\n\n\n"
+    "text": "A Signal is value that will contain a value in the future. The value of the Signal can change at any time.\n\nUse map to derive new Signals, subscribe! to subscribe to updates of a Signal, and push! to update the current value of a Signal. value returns the current value of a Signal.\n\ntext = Signal(\"\")\n\ntext2 = map(s -> \"Bye $s\", text)\n\nsubscribe!(text) do s\n    println(\"Hello $s\")\nend\n\npush!(text, \"world\")\n\nvalue(text)\nvalue(text2)\n\n\n\n"
 },
 
 {
@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.flatmap",
     "category": "Method",
-    "text": "flatmap(f, input)\n\n\nTransform the Signal into another Signal using a function. It's like map,  but it's meant for functions that return Signals.\n\n\n\n"
+    "text": "flatmap(f, input)\n\n\nTransform the Signal into another Signal using a function. It's like map, but it's meant for functions that return Signals.\n\n\n\n"
 },
 
 {
@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.flatten",
     "category": "Method",
-    "text": "flatten(input)\n\n\nFlatten a Signal of Signals into a Signal which holds the value of the current Signal. \n\n\n\n"
+    "text": "flatten(input)\n\n\nFlatten a Signal of Signals into a Signal which holds the value of the current Signal.\n\n\n\n"
 },
 
 {
@@ -101,7 +101,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.foldp",
     "category": "Method",
-    "text": "foldp(f, v0, us)\n\n\nFold/map over past values. The first argument to the function f is an accumulated value that the function can operate over, and the  second is the current value coming in. v0 is the initial value of the accumulated value.\n\na = Signal(2)\n# accumulate sums coming in from a, starting at zero\nb = foldp(+, 0, a) # b == 2\npush!(a, 2)        # b == 4\npush!(a, 3)        # b == 7\n\n\n\n"
+    "text": "foldp(f, v0, us)\n\n\nFold/map over past values. The first argument to the function f is an accumulated value that the function can operate over, and the second is the current value coming in. v0 is the initial value of the accumulated value.\n\na = Signal(2)\n# accumulate sums coming in from a, starting at zero\nb = foldp(+, 0, a) # b == 2\npush!(a, 2)        # b == 4\npush!(a, 3)        # b == 7\n\n\n\n"
 },
 
 {
@@ -109,7 +109,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.preserve",
     "category": "Method",
-    "text": "preserve(x)\n\n\nFor compatibility with Reactive.  It just returns the original Signal because this isn't needed with direct push! updates.\n\n\n\n"
+    "text": "preserve(x)\n\n\nFor compatibility with Reactive. It just returns the original Signal because this isn't needed with direct push! updates.\n\n\n\n"
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.previous",
     "category": "Function",
-    "text": "previous(input, default)\nprevious(input)\n\n\nCreate a Signal which holds the previous value of input. You can optionally specify a different initial value.\n\n\n\n"
+    "text": "previous(input)\nprevious(input, default)\n\n\nCreate a Signal which holds the previous value of input. You can optionally specify a different initial value.\n\n\n\n"
 },
 
 {
@@ -161,7 +161,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#Base.filter-Union{Tuple{Any,T,ReactiveBasics.Signal{T}}, Tuple{T}} where T",
+    "location": "api.html#Base.filter-Union{Tuple{T}, Tuple{Any,T,ReactiveBasics.Signal{T}}} where T",
     "page": "API",
     "title": "Base.filter",
     "category": "Method",
@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.unsubscribe!",
     "category": "Method",
-    "text": "unsubscribe!(f, u)\n\n\nUnsubscribe to the changes of this Signal. \n\n\n\n"
+    "text": "unsubscribe!(f, u)\n\n\nUnsubscribe to the changes of this Signal.\n\n\n\n"
 },
 
 {
