@@ -187,12 +187,8 @@ the accumulated value.
     push!(a, 3)        # b == 7
 """
 function foldp(f, v0, us::Signal...)
-    v0r = Ref(v0)
-    if isa(v0r, Base.RefArray)
-        map((x...) -> v0r.x[:] = f(v0r.x, x...), us...)
-    else
-        map((x...) -> v0r[] = f(v0r.x, x...), us...)
-    end
+    v0r = Base.RefValue(v0)
+    map((x...) -> v0r[] = f(v0r[], x...), us...)
 end
 
 """
@@ -238,19 +234,15 @@ Flatten a Signal of Signals into a Signal which holds the
 value of the current Signal.
 """
 function flatten(input::Signal)
-    sigref = Ref(input.value)
+    sigref = Base.RefValue(input.value)
     signal = Signal(input.value.value)
     updater = u -> push!(signal, u)
     subscribe!(updater, input.value)
     subscribe!(input) do u
         push!(signal, u.value)
-        unsubscribe!(updater, sigref.x)
+        unsubscribe!(updater, sigref[])
         subscribe!(updater, u)
-        if isa(sigref, Base.RefArray)
-            sigref.x[:] = u
-        else
-            sigref[] = u
-        end
+        sigref[] = u
     end
     push!(input, input.value)
     signal
@@ -288,14 +280,10 @@ Create a Signal which holds the previous value of `input`.
 You can optionally specify a different initial value.
 """
 function previous(input::Signal, default=value(input))
-    past = Ref(default)
+    past = Base.RefValue(default)
     map(input) do u
-        res = deepcopy(past.x)
-        if isa(past, Base.RefArray)
-            past.x[:] = u
-        else
-            past[] = u
-        end
+        res = past[]
+        past[] = u
         res
     end
 end
