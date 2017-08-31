@@ -36,7 +36,7 @@ facts("Basic checks") do
         push!(b, number())
         @fact value(c) --> value(a) + value(b)
     end
-   
+
     context("merge") do
 
         ## Merge
@@ -47,7 +47,7 @@ facts("Basic checks") do
         @fact value(e) --> value(d)
 
         push!(a, number())
-        # Note that his works differently than Reactive.jl because of the 
+        # Note that his works differently than Reactive.jl because of the
         # way updates are pushed.
         @fact value(e) --> value(a)
 
@@ -62,7 +62,7 @@ facts("Basic checks") do
 
         push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a))
-        
+
         e = zip(d, b, a, Signal(3))
         push!(a, number())
         @fact value(e) --> (value(d), value(b), value(a), 3)
@@ -100,6 +100,28 @@ facts("Basic checks") do
 
         push!(g, 3)
         @fact value(h) --> 3
+    end
+
+    context("filterwhen") do
+        # filterwhen
+        bs = Signal(false)
+        as = Signal(1)
+        cs = filterwhen(bs, 9, as)
+        @fact value(cs) --> 9
+
+        bs = Signal(true)
+        as = Signal(1)
+        cs = filterwhen(bs, 9, as)
+        @fact value(cs) --> 1
+
+        push!(as, 2)
+        @fact value(cs) --> 2
+        push!(bs, false)
+        @fact value(cs) --> 2
+        push!(as, 5)
+        @fact value(cs) --> 2
+        push!(bs, true)
+        @fact value(cs) --> 5
     end
 
     context("push! inside push!") do
@@ -157,7 +179,7 @@ facts("Basic checks") do
 
         @fact value(y) --> -2
     end
-    
+
     context("flatmap") do
 
         a = Signal(1)
@@ -246,7 +268,7 @@ facts("Basic checks") do
 
         @fact value(y) --> ones(2,3) * 2
     end
-   
+
     context("bind!") do
         x = Signal(1)
         y = Signal(2)
@@ -319,4 +341,3 @@ facts("Flatten") do
         @fact value(d) --> value(b)
     end
 end
-
