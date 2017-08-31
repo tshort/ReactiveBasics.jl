@@ -81,6 +81,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#ReactiveBasics.filterwhen-Union{Tuple{T}, Tuple{ReactiveBasics.Signal{Bool},T,ReactiveBasics.Signal{T}}} where T",
+    "page": "API",
+    "title": "ReactiveBasics.filterwhen",
+    "category": "Method",
+    "text": "filterwhen(predicate, default, u)\n\n\nKeep updates to input only when switch is true. If switch is false initially, the specified default value is used.\n\n\n\n"
+},
+
+{
     "location": "api.html#ReactiveBasics.flatmap-Tuple{Any,ReactiveBasics.Signal}",
     "page": "API",
     "title": "ReactiveBasics.flatmap",
