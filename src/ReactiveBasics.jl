@@ -2,7 +2,7 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve
+export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve, filterwhen
 
 # This API mainly follows that of Reactive.jl.
 
@@ -201,6 +201,19 @@ Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates 
 function Base.filter{T}(f, default::T, u::Signal{T})
     signal = Signal(f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
+    signal
+end
+
+"""
+$(SIGNATURES)
+
+Keep updates to `input` only when `switch` is true.
+If switch is false initially, the specified default value is used.
+"""
+function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
+    signal = Signal(predicate.value ? u.value : default)
+    subscribe!(result -> predicate.value && push!(signal, result), u)
+    subscribe!(v -> v && push!(signal, u.value), predicate)
     signal
 end
 

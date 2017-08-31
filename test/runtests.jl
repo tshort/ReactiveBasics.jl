@@ -113,6 +113,28 @@ facts("Basic checks") do
         @fact value(h) --> 3
     end
 
+    context("filterwhen") do
+        # filterwhen
+        bs = Signal(false)
+        as = Signal(1)
+        cs = filterwhen(bs, 9, as)
+        @fact value(cs) --> 9
+
+        bs = Signal(true)
+        as = Signal(1)
+        cs = filterwhen(bs, 9, as)
+        @fact value(cs) --> 1
+
+        push!(as, 2)
+        @fact value(cs) --> 2
+        push!(bs, false)
+        @fact value(cs) --> 2
+        push!(as, 5)
+        @fact value(cs) --> 2
+        push!(bs, true)
+        @fact value(cs) --> 5
+    end
+
     context("push! inside push!") do
         a = Signal(0)
         b = Signal(1)
