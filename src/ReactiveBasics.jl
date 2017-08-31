@@ -214,7 +214,7 @@ function flatten(input::Signal)
     subscribe!(updater, input.value)
     subscribe!(input) do u
         push!(signal, u.value)
-        unsubscribe!(updater, sigref[])
+        unsubscribe!(updater, sigref.x)
         subscribe!(updater, u)
         sigref[] = u
     end
