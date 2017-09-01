@@ -30,7 +30,9 @@ Various utility functions are available to manipulate signals, including:
 - [`subscribe!`](@ref) -- Subscribe to the changes of a Signal. 
 - [`merge`](@ref) -- Combine Signals.
 - [`zip`](@ref) -- Combine Signals as a Tuple.
+- [`zipmap`](@ref) -- Zip then map.
 - [`filter`](@ref) -- A Signal filtered based on a function.
+- [`filterwhen`](@ref) -- A Signal filtered based on a Signal.
 - [`foldp`](@ref) -- Fold/map over past values.
 - [`flatmap`](@ref) -- Like `map`, but it's meant for functions that return `Signal`s.
 - [`asyncmap`](@ref) -- Like `map`, but it updates asynchronously.
