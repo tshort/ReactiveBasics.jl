@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Example",
     "category": "section",
-    "text": "The Signal type holds values that can depend on other Signals.  map(f, xs...) returns a new Signal that depends on one or more Signals xs....  The function f defines the value that the Signal should take as a function of the values of each of the input Signals.  When a Signal is updated using push!, changes propagate to dependent Signals.  Here is an example taken from Reactive.jl:using ReactiveBasics\nx = Signal(0)\nvalue(x)\npush!(x, 42)\nvalue(x)\nxsquared = map(a -> a*a, x)\nvalue(xsquared)\npush!(x, 3)\nvalue(xsquared)Various utility functions are available to manipulate signals, including:subscribe! – Subscribe to the changes of a Signal. \nmerge – Combine Signals.\nzip – Combine Signals as a Tuple.\nfilter – A Signal filtered based on a function.\nfoldp – Fold/map over past values.\nflatmap – Like map, but it's meant for functions that return Signals.\nasyncmap – Like map, but it updates asynchronously.\nflatten – Flatten a Signal of Signals.\nbind! – Bind two Signals, so that updates to one are synchronized with the other.\ndroprepeats – Drop repeats in the input Signal.\nprevious – A Signal with the previous value of the input Signal.\nsampleon – Sample one Signal when another changes.\npreserve – No-op for compatibility with Reactive."
+    "text": "The Signal type holds values that can depend on other Signals.  map(f, xs...) returns a new Signal that depends on one or more Signals xs....  The function f defines the value that the Signal should take as a function of the values of each of the input Signals.  When a Signal is updated using push!, changes propagate to dependent Signals.  Here is an example taken from Reactive.jl:using ReactiveBasics\nx = Signal(0)\nvalue(x)\npush!(x, 42)\nvalue(x)\nxsquared = map(a -> a*a, x)\nvalue(xsquared)\npush!(x, 3)\nvalue(xsquared)Various utility functions are available to manipulate signals, including:subscribe! – Subscribe to the changes of a Signal. \nmerge – Combine Signals.\nzip – Combine Signals as a Tuple.\nzipmap – Zip then map.\nfilter – A Signal filtered based on a function.\nfilterwhen – A Signal filtered based on a Signal.\nfoldp – Fold/map over past values.\nflatmap – Like map, but it's meant for functions that return Signals.\nasyncmap – Like map, but it updates asynchronously.\nflatten – Flatten a Signal of Signals.\nbind! – Bind two Signals, so that updates to one are synchronized with the other.\ndroprepeats – Drop repeats in the input Signal.\nprevious – A Signal with the previous value of the input Signal.\nsampleon – Sample one Signal when another changes.\npreserve – No-op for compatibility with Reactive."
 },
 
 {
@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.filterwhen",
     "category": "Method",
-    "text": "filterwhen(predicate, default, u)\n\n\nKeep updates to input only when switch is true. If switch is false initially, the specified default value is used.\n\n\n\n"
+    "text": "filterwhen(predicate, default, u)\n\n\nKeep updates to u only when predicate is true. If predicate is false initially, the specified default value is used.\n\n\n\n"
 },
 
 {
@@ -145,6 +145,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#ReactiveBasics.unsubscribe!-Tuple{Any,ReactiveBasics.Signal}",
+    "page": "API",
+    "title": "ReactiveBasics.unsubscribe!",
+    "category": "Method",
+    "text": "unsubscribe!(f, u)\n\n\nUnsubscribe to the changes of this Signal.\n\n\n\n"
+},
+
+{
     "location": "api.html#ReactiveBasics.value-Tuple{ReactiveBasics.Signal}",
     "page": "API",
     "title": "ReactiveBasics.value",
@@ -157,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.zipmap",
     "category": "Method",
-    "text": "zipmap(f, u, us)\n\n\nZips given signals first and then applys the map function onto the zipped value. This allows to omit the double calculation when using map.\n\nas = Signal(1)\nbs = map(a -> a * 0.1, as)\ncs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for\n# every change in Signal as\n\n\n\n"
+    "text": "zipmap(f, u, us)\n\n\nZips given signals first and then applies the map function onto the zipped value. This omits the double calculation when using map.\n\nas = Signal(1)\nbs = map(a -> a * 0.1, as)\ncs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for\n                                    # every change in `as`\n\n\n\n"
 },
 
 {
@@ -206,14 +214,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.push!",
     "category": "Method",
     "text": "push!(u, val)\n\n\nUpdate the value of a Signal and propagate the change.\n\n\n\n"
-},
-
-{
-    "location": "api.html#ReactiveBasics.unsubscribe!-Tuple{Any,ReactiveBasics.Signal}",
-    "page": "API",
-    "title": "ReactiveBasics.unsubscribe!",
-    "category": "Method",
-    "text": "unsubscribe!(f, u)\n\n\nUnsubscribe to the changes of this Signal.\n\n\n\n"
 },
 
 {
