@@ -311,6 +311,21 @@ facts("Basic checks") do
         @fact value(y) --> value(x)
         @fact value(y) --> 20
         @fact value(xx) --> 40
+
+        x = Signal(1)
+        y = Signal(2)
+        xx = map(u -> 2u, x)
+        yy = map(u -> 3u, y)
+        bind!(x, y, false)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 2
+        push!(x, 10)
+        @fact value(y) --> 2
+        @fact value(x) --> 10
+        push!(y, 20)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 20
+        @fact value(xx) --> 40
     end
 
     context("preserve") do
