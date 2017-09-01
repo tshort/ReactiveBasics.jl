@@ -65,11 +65,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#ReactiveBasics.bind!-Tuple{ReactiveBasics.Signal,ReactiveBasics.Signal}",
+    "location": "api.html#ReactiveBasics.bind!",
     "page": "API",
     "title": "ReactiveBasics.bind!",
-    "category": "Method",
-    "text": "bind!(a, b)\n\n\nFor every update to a also update b with the same value and vice-versa. Initially update a with the value in b.\n\n\n\n"
+    "category": "Function",
+    "text": "bind!(a, b)\nbind!(a, b, twoway)\n\n\nFor every update to b also update a with the same value and, if twoway is true, vice-versa. Initially update a with the value in b.\n\n\n\n"
 },
 
 {
