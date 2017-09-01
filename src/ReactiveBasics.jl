@@ -2,7 +2,8 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve, filterwhen, zipmap
+export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous, 
+       sampleon, preserve, filterwhen, zipmap
 
 # This API mainly follows that of Reactive.jl.
 
@@ -105,13 +106,13 @@ end
 """
 $(SIGNATURES)
 
-Zips given signals first and then applys the map function onto the
-zipped value. This allows to omit the double calculation when using map.
+Zips given signals first and then applies the `map` function onto the
+zipped value. This omits the double calculation when using `map`.
 
     as = Signal(1)
     bs = map(a -> a * 0.1, as)
     cs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for
-    # every change in Signal as
+                                        # every change in `as`
 """
 function zipmap(f, u::Signal, us::Signal...)
     zipped_signal = zip(u, us...)
@@ -221,8 +222,8 @@ end
 """
 $(SIGNATURES)
 
-Keep updates to `input` only when `switch` is true.
-If switch is false initially, the specified default value is used.
+Keep updates to `u` only when `predicate` is true.
+If `predicate` is false initially, the specified `default` value is used.
 """
 function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
     signal = Signal(predicate.value ? u.value : default)
