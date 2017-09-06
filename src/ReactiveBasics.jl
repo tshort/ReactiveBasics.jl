@@ -2,7 +2,7 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous, 
+export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous,
        sampleon, preserve, filterwhen, zipmap
 
 # This API mainly follows that of Reactive.jl.
@@ -42,6 +42,8 @@ type Signal{T}
 end
 
 Signal(val) = Signal(val, Function[])
+
+Signal{T}(::Type{T}, val) = Signal{T}(val, Function[])
 
 """
 $(SIGNATURES)

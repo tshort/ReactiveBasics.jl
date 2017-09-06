@@ -3,12 +3,27 @@ using FactCheck
 
 number() = round(Int, rand()*1000)
 
+abstract type Action{T} end
+struct Update{T} <: Action{T}
+    val::T
+end
+struct Reset{T} <: Action{T}
+    val::T
+end
+
 ## Basics
 
 facts("Basic checks") do
 
     a = Signal(number())
     b = map(x -> x*x, a)
+
+    context("Signal") do
+        as = Signal(Action, Update(1))
+        @fact value(as) --> Update(1)
+        push!(as, Reset(1))
+        @fact value(as) --> Reset(1)
+    end
 
     context("map") do
 
@@ -99,11 +114,7 @@ facts("Basic checks") do
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
-<<<<<<< HEAD
         nums = rand(Int, 100)
-=======
-        nums = round.(Int, rand(100)*1000)
->>>>>>> c355bd628871a00d8f09037788be46bc2e3f5508
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
