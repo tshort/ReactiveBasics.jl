@@ -186,7 +186,7 @@ Merge Signals into the current Signal. The value of the Signal is that from
 the most recent update.
 """
 function Base.merge(u::Signal, us::Signal...)
-    signal = Signal(u.value)
+    signal = Signal(typejoin(map(x -> typeof(value(x)), (u, us...))...), u.value)
     for v in (u, us...)
         subscribe!(x -> push!(signal, x), v)
     end
