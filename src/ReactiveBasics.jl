@@ -2,7 +2,7 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous, 
+export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous,
        sampleon, preserve, filterwhen, zipmap
 
 # This API mainly follows that of Reactive.jl.
@@ -42,6 +42,8 @@ type Signal{T}
 end
 
 Signal(val) = Signal(val, Function[])
+
+Signal{T}(::Type{T}, val) = Signal{T}(val, Function[])
 
 """
 $(SIGNATURES)
@@ -184,7 +186,7 @@ Merge Signals into the current Signal. The value of the Signal is that from
 the most recent update.
 """
 function Base.merge(u::Signal, us::Signal...)
-    signal = Signal(u.value)
+    signal = Signal(typejoin(map(x -> typeof(value(x)), (u, us...))...), u.value)
     for v in (u, us...)
         subscribe!(x -> push!(signal, x), v)
     end

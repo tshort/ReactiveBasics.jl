@@ -3,12 +3,27 @@ using FactCheck
 
 number() = round(Int, rand()*1000)
 
+abstract Action{T}
+type Update{T} <: Action{T}
+    val::T
+end
+type Reset{T} <: Action{T}
+    val::T
+end
+
 ## Basics
 
 facts("Basic checks") do
 
     a = Signal(number())
     b = map(x -> x*x, a)
+
+    context("Signal") do
+        as = Signal(Action, Update(1))
+        @fact typeof(value(as)) --> Update{Int64}
+        push!(as, Reset(1))
+        @fact typeof(value(as)) --> Reset{Int64}
+    end
 
     context("map") do
 
@@ -66,6 +81,11 @@ facts("Basic checks") do
         # way updates are pushed.
         @fact value(e) --> value(a)
 
+        # Merge two different signal types
+        as = Signal(Update(1))
+        bs = Signal(Reset(2))
+        cs = merge(as, bs)
+        @fact typeof(value(cs)) --> Update{Int64}
     end
 
     context("zip") do
