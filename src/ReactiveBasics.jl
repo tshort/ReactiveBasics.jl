@@ -57,27 +57,27 @@ $(SIGNATURES)
 
 Transform the Signal into another Signal using a function.
 """
-function Base.map(f, u::Signal)
-    signal = Signal(f(u.value))
+function Base.map(f, u::Signal; init = f(u.value), typ = typeof(init))
+    signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x)), u)
     signal
 end
-function Base.map(f, u::Signal, v::Signal)
-    signal = Signal(f(u.value, v.value))
+function Base.map(f, u::Signal, v::Signal; init = f(u.value, v.value), typ = typeof(init))
+    signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x, v.value)), u)
     subscribe!(x -> push!(signal, f(u.value, x)), v)
     signal
 end
-function Base.map(f, u::Signal, v::Signal, w::Signal)
-    signal = Signal(f(u.value, v.value, w.value))
+function Base.map(f, u::Signal, v::Signal, w::Signal; init = f(u.value, v.value, w.value), typ = typeof(init))
+    signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x, v.value, w.value)), u)
     subscribe!(x -> push!(signal, f(u.value, x, w.value)), v)
     subscribe!(x -> push!(signal, f(u.value, v.value, x)), w)
     signal
 end
-function Base.map(f, u::Signal, v::Signal, w::Signal, xs::Signal...)
+function Base.map(f, u::Signal, v::Signal, w::Signal, xs::Signal...; init = f((u.value for u in (u,v,w,xs...))...), typ = typeof(init))
     us = (u,v,w,xs...)
-    signal = Signal(f((u.value for u in us)...))
+    signal = Signal(typ, init)
     for (i,u) in enumerate(us)
         subscribe!(u) do x
             vals = f(((i == j ? x : us[j].value for j in 1:length(us))...)...)
@@ -93,8 +93,8 @@ $(SIGNATURES)
 Transform the Signal into another Signal using a function. It's like `map`,
 but it's meant for functions that return `Signal`s.
 """
-function flatmap(f, input::Signal)
-    signal = Signal(f(input.value).value)
+function flatmap(f, input::Signal; init = f(input.value).value, typ = typeof(init))
+    signal = Signal(typ, init)
     subscribe!(input) do u
         innersig = f(u)
         push!(signal, innersig.value)
@@ -116,9 +116,9 @@ zipped value. This omits the double calculation when using `map`.
     cs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for
                                         # every change in `as`
 """
-function zipmap(f, u::Signal, us::Signal...)
+function zipmap(f, u::Signal, us::Signal...; init = f(zip(u, us...).value...), typ = typeof(init))
     zipped_signal = zip(u, us...)
-    signal = Signal(f(zipped_signal.value...))
+    signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x...)), zipped_signal)
     signal
 end
@@ -164,7 +164,7 @@ Tuple of the values of the contained Signals.
 """
 function Base.zip(u::Signal, us::Signal...)
     signals = (u,us...)
-    signal = Signal(map(u -> value(u), signals))
+    signal = Signal(map(value, signals))
     pasts = collect(map(u -> Array{typeof(value(u)), 1}(0), signals))
     for i in 1:length(signals)
         subscribe!(signals[i]) do u
@@ -216,7 +216,7 @@ end
 Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates to `true`.
 """
 function Base.filter{T}(f, default::T, u::Signal{T})
-    signal = Signal(f(u.value) ? u.value : default)
+    signal = Signal(T, f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
     signal
 end
@@ -228,7 +228,7 @@ Keep updates to `u` only when `predicate` is true.
 If `predicate` is false initially, the specified `default` value is used.
 """
 function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
-    signal = Signal(predicate.value ? u.value : default)
+    signal = Signal(T, predicate.value ? u.value : default)
     subscribe!(result -> predicate.value && push!(signal, result), u)
     subscribe!(v -> v && push!(signal, u.value), predicate)
     signal
@@ -240,8 +240,8 @@ $(SIGNATURES)
 An asynchronous version of `map` that returns a Signal that is updated after `f` operates asynchronously.
 The initial value of the returned Signal (the `init` arg) must be supplied.
 """
-function Base.asyncmap(f, init, input::Signal, inputs::Signal...)
-    result = Signal(init)
+function Base.asyncmap(f, init, input::Signal, inputs::Signal...; typ = typeof(init))
+    result = Signal(typ, init)
     map(input, inputs...) do args...
         @async push!(result, f(args...))
     end
@@ -291,8 +291,8 @@ $(SIGNATURES)
 Drop updates to `input` whenever the new value is the same
 as the previous value of the Signal.
 """
-function droprepeats(input::Signal)
-    result = Signal(value(input))
+function droprepeats{T}(input::Signal{T})
+    result = Signal(T, value(input))
     subscribe!(u -> u != value(result) && push!(result, u), input)
     result
 end
@@ -317,8 +317,8 @@ $(SIGNATURES)
 
 Sample the value of `b` whenever `a` updates.
 """
-function sampleon(a::Signal, b::Signal)
-    result = Signal(value(b))
+function sampleon{T}(a::Signal, b::Signal{T})
+    result = Signal(T, value(b))
     subscribe!(u -> push!(result, value(b)), a)
     result
 end

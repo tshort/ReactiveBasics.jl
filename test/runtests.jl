@@ -50,6 +50,10 @@ facts("Basic checks") do
 
         push!(b, number())
         @fact value(c) --> value(a) + value(b)
+
+        as = Signal(0)
+        bs = map(Update, as, typ = Action{Int64})
+        @fact typeof(bs) --> Signal{Action{Int64}}
     end
 
     context("zipmap") do
