@@ -2,7 +2,8 @@ module ReactiveBasics
 
 using DocStringExtensions
 
-export Signal, value, foldp, subscribe!, flatmap, flatten, bind!, droprepeats, previous, sampleon, preserve, filterwhen
+export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous, 
+       sampleon, preserve, filterwhen, zipmap
 
 # This API mainly follows that of Reactive.jl.
 
@@ -99,6 +100,24 @@ function flatmap(f, input::Signal)
             push!(signal, v)
         end
     end
+    signal
+end
+
+"""
+$(SIGNATURES)
+
+Zips given signals first and then applies the `map` function onto the
+zipped value. This omits the double calculation when using `map`.
+
+    as = Signal(1)
+    bs = map(a -> a * 0.1, as)
+    cs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for
+                                        # every change in `as`
+"""
+function zipmap(f, u::Signal, us::Signal...)
+    zipped_signal = zip(u, us...)
+    signal = Signal(f(zipped_signal.value...))
+    subscribe!(x -> push!(signal, f(x...)), zipped_signal)
     signal
 end
 
@@ -203,8 +222,8 @@ end
 """
 $(SIGNATURES)
 
-Keep updates to `input` only when `switch` is true.
-If switch is false initially, the specified default value is used.
+Keep updates to `u` only when `predicate` is true.
+If `predicate` is false initially, the specified `default` value is used.
 """
 function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
     signal = Signal(predicate.value ? u.value : default)
@@ -252,12 +271,15 @@ end
 """
 $(SIGNATURES)
 
-For every update to `a` also update `b` with the same value and vice-versa.
+For every update to `b` also update `a` with the same value and, if
+`twoway` is true, vice-versa.
 Initially update `a` with the value in `b`.
 """
-function bind!(a::Signal, b::Signal)
+function bind!(a::Signal, b::Signal, twoway=true)
     push!(a, b.value)
-    subscribe!(u -> u != value(b) && push!(b, u), a)
+    if twoway
+        subscribe!(u -> u != value(b) && push!(b, u), a)
+    end
     subscribe!(u -> u != value(a) && push!(a, u), b)
 end
 

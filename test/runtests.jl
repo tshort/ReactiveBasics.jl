@@ -37,6 +37,21 @@ facts("Basic checks") do
         @fact value(c) --> value(a) + value(b)
     end
 
+    context("zipmap") do
+
+        as = Signal(1)
+        bs = map(a -> a * 0.1, as)
+        cs = zipmap((a,b) -> a + b, as, bs)
+        counts = foldp((cnt,_) -> cnt + 1, 0, cs)
+
+        @fact value(counts) --> 1
+        @fact value(cs) --> 1.1
+
+        push!(as, 2)
+        @fact value(counts) --> 2
+        @fact value(cs) --> 2.2
+    end
+
     context("merge") do
 
         ## Merge
@@ -296,6 +311,21 @@ facts("Basic checks") do
         @fact value(y) --> value(x)
         @fact value(y) --> 10
         @fact value(yy) --> 30
+        push!(y, 20)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 20
+        @fact value(xx) --> 40
+
+        x = Signal(1)
+        y = Signal(2)
+        xx = map(u -> 2u, x)
+        yy = map(u -> 3u, y)
+        bind!(x, y, false)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 2
+        push!(x, 10)
+        @fact value(y) --> 2
+        @fact value(x) --> 10
         push!(y, 20)
         @fact value(y) --> value(x)
         @fact value(y) --> 20
