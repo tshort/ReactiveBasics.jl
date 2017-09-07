@@ -131,11 +131,6 @@ facts("Basic checks") do
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
-<<<<<<< HEAD
-        nums = rand(Int, 100)
-=======
-        nums = round.(Int, rand(100)*1000)
->>>>>>> c355bd628871a00d8f09037788be46bc2e3f5508
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
