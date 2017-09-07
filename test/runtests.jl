@@ -116,6 +116,14 @@ facts("Basic checks") do
 
         e = zip(d, b, a, Signal(3))
         @fact value(e) --> (value(d), value(b), value(a), 3)
+
+        as = Signal(Action{Int64}, Update(1))
+        bs = Signal(Reset(2))
+        cs = zip(as, bs)
+        @fact typeof(cs) --> Signal{Tuple{Action{Int64}, Reset{Int64}}}
+
+        push!(as, Reset(3))
+        @fact typeof(cs) --> Signal{Tuple{Action{Int64}, Reset{Int64}}}
     end
 
     context("foldp") do

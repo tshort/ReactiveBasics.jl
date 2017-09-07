@@ -20,6 +20,8 @@ The value of the Signal can change at any time.
 Use `map` to derive new Signals, `subscribe!` to subscribe to updates of a Signal,
 and `push!` to update the current value of a Signal.
 `value` returns the current value of a Signal.
+The type of the Signal can optionally be set by the first parameter. Otherwise
+it will default to the type of the initial value.
 
 ```julia
 text = Signal("")
@@ -34,6 +36,8 @@ push!(text, "world")
 
 value(text)
 value(text2)
+
+float_number = Signal(Float64, 1) # Optionally set the type of the Signal
 ```
 """
 type Signal{T}
@@ -45,6 +49,8 @@ Signal(val) = Signal(val, Function[])
 
 Signal{T}(::Type{T}, val) = Signal{T}(val, Function[])
 
+Base.eltype{T}(::Type{Signal{T}}) = T
+
 """
 $(SIGNATURES)
 
@@ -55,7 +61,11 @@ value(u::Signal) = u.value
 """
 $(SIGNATURES)
 
-Transform the Signal into another Signal using a function.
+Transform the Signal into another Signal using a function. The initial value of
+the output Signal can optionally be set via `init`. Otherwise it defaults to
+`f(u.value)`, where f is the passed function and u is the passed Signal. The type
+of the output Signal can optionally be set via `typ`. Otherwise it defaults to
+the type of the initial value.
 """
 function Base.map(f, u::Signal; init = f(u.value), typ = typeof(init))
     signal = Signal(typ, init)
@@ -91,7 +101,11 @@ end
 $(SIGNATURES)
 
 Transform the Signal into another Signal using a function. It's like `map`,
-but it's meant for functions that return `Signal`s.
+but it's meant for functions that return `Signal`s. The initial value of
+the output Signal can optionally be set via `init`. Otherwise it defaults to
+`f(input.value).value`, where f is the passed function and input is the passed
+Signal of Signals. The type of the output Signal can optionally be set via `typ`.
+Otherwise it defaults to the type of the initial value.
 """
 function flatmap(f, input::Signal; init = f(input.value).value, typ = typeof(init))
     signal = Signal(typ, init)
@@ -109,7 +123,11 @@ end
 $(SIGNATURES)
 
 Zips given signals first and then applies the `map` function onto the
-zipped value. This omits the double calculation when using `map`.
+zipped value. This omits the double calculation when using `map`. The
+initial value of the output Signal can optionally be set via `init`. Otherwise
+it defaults to `f(zip(u, us...).value...)`, where f is the passed function and
+(u, us...) are the passed Signals. The type of the output Signal can optionally
+be set via `typ`. Otherwise it defaults to the type of the initial value.
 
     as = Signal(1)
     bs = map(a -> a * 0.1, as)
@@ -164,8 +182,8 @@ Tuple of the values of the contained Signals.
 """
 function Base.zip(u::Signal, us::Signal...)
     signals = (u,us...)
-    signal = Signal(map(value, signals))
-    pasts = collect(map(u -> Array{typeof(value(u)), 1}(0), signals))
+    signal = Signal(Tuple{map(u -> eltype(typeof(u)), signals)...}, map(value, signals))
+    pasts = collect(map(u -> Array{eltype(typeof(u)), 1}(0), signals))
     for i in 1:length(signals)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
@@ -186,7 +204,7 @@ Merge Signals into the current Signal. The value of the Signal is that from
 the most recent update.
 """
 function Base.merge(u::Signal, us::Signal...)
-    signal = Signal(typejoin(map(x -> typeof(value(x)), (u, us...))...), u.value)
+    signal = Signal(typejoin(map(x -> eltype(typeof(x)), (u, us...))...), u.value)
     for v in (u, us...)
         subscribe!(x -> push!(signal, x), v)
     end
@@ -237,8 +255,10 @@ end
 """
 $(SIGNATURES)
 
-An asynchronous version of `map` that returns a Signal that is updated after `f` operates asynchronously.
-The initial value of the returned Signal (the `init` arg) must be supplied.
+An asynchronous version of `map` that returns a Signal that is updated after `f`
+operates asynchronously. The initial value of the returned Signal
+(the `init` arg) must be supplied. The type of the output Signal can optionally
+be set via `typ`. Otherwise it defaults to the type of the initial value.
 """
 function Base.asyncmap(f, init, input::Signal, inputs::Signal...; typ = typeof(init))
     result = Signal(typ, init)
