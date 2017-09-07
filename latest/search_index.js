@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.Signal",
     "category": "Type",
-    "text": "A Signal is value that will contain a value in the future. The value of the Signal can change at any time.\n\nUse map to derive new Signals, subscribe! to subscribe to updates of a Signal, and push! to update the current value of a Signal. value returns the current value of a Signal.\n\ntext = Signal(\"\")\n\ntext2 = map(s -> \"Bye $s\", text)\n\nsubscribe!(text) do s\n    println(\"Hello $s\")\nend\n\npush!(text, \"world\")\n\nvalue(text)\nvalue(text2)\n\n\n\n"
+    "text": "A Signal is value that will contain a value in the future. The value of the Signal can change at any time.\n\nUse map to derive new Signals, subscribe! to subscribe to updates of a Signal, and push! to update the current value of a Signal. value returns the current value of a Signal. The type of the Signal can optionally be set by the first parameter. Otherwise it will default to the type of the initial value.\n\ntext = Signal(\"\")\n\ntext2 = map(s -> \"Bye $s\", text)\n\nsubscribe!(text) do s\n    println(\"Hello $s\")\nend\n\npush!(text, \"world\")\n\nvalue(text)\nvalue(text2)\n\nfloat_number = Signal(Float64, 1) # Optionally set the type of the Signal\n\n\n\n"
 },
 
 {
@@ -73,7 +73,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#ReactiveBasics.droprepeats-Tuple{ReactiveBasics.Signal}",
+    "location": "api.html#ReactiveBasics.droprepeats-Union{Tuple{ReactiveBasics.Signal{T}}, Tuple{T}} where T",
     "page": "API",
     "title": "ReactiveBasics.droprepeats",
     "category": "Method",
@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.flatmap",
     "category": "Method",
-    "text": "flatmap(f, input)\n\n\nTransform the Signal into another Signal using a function. It's like map, but it's meant for functions that return Signals.\n\n\n\n"
+    "text": "flatmap(f, input; init, typ)\n\n\nTransform the Signal into another Signal using a function. It's like map, but it's meant for functions that return Signals. The initial value of the output Signal can optionally be set via init. Otherwise it defaults to f(input.value).value, where f is the passed function and input is the passed Signal of Signals. The type of the output Signal can optionally be set via typ. Otherwise it defaults to the type of the initial value.\n\n\n\n"
 },
 
 {
@@ -129,7 +129,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#ReactiveBasics.sampleon-Tuple{ReactiveBasics.Signal,ReactiveBasics.Signal}",
+    "location": "api.html#ReactiveBasics.sampleon-Union{Tuple{T}, Tuple{ReactiveBasics.Signal,ReactiveBasics.Signal{T}}} where T",
     "page": "API",
     "title": "ReactiveBasics.sampleon",
     "category": "Method",
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.zipmap",
     "category": "Method",
-    "text": "zipmap(f, u, us)\n\n\nZips given signals first and then applies the map function onto the zipped value. This omits the double calculation when using map.\n\nas = Signal(1)\nbs = map(a -> a * 0.1, as)\ncs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for\n                                    # every change in `as`\n\n\n\n"
+    "text": "zipmap(f, u, us; init, typ)\n\n\nZips given signals first and then applies the map function onto the zipped value. This omits the double calculation when using map. The initial value of the output Signal can optionally be set via init. Otherwise it defaults to f(zip(u, us...).value...), where f is the passed function and (u, us...) are the passed Signals. The type of the output Signal can optionally be set via typ. Otherwise it defaults to the type of the initial value.\n\nas = Signal(1)\nbs = map(a -> a * 0.1, as)\ncs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for\n                                    # every change in `as`\n\n\n\n"
 },
 
 {
@@ -181,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "Base.asyncmap",
     "category": "Method",
-    "text": "asyncmap(f, init, input, inputs; ntasks, batch_size)\n\n\nAn asynchronous version of map that returns a Signal that is updated after f operates asynchronously. The initial value of the returned Signal (the init arg) must be supplied.\n\n\n\n"
+    "text": "asyncmap(f, init, input, inputs; typ)\n\n\nAn asynchronous version of map that returns a Signal that is updated after f operates asynchronously. The initial value of the returned Signal (the init arg) must be supplied. The type of the output Signal can optionally be set via typ. Otherwise it defaults to the type of the initial value.\n\n\n\n"
 },
 
 {
@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "Base.map",
     "category": "Method",
-    "text": "map(f, u)\n\n\nTransform the Signal into another Signal using a function.\n\n\n\n"
+    "text": "map(f, u; init, typ)\n\n\nTransform the Signal into another Signal using a function. The initial value of the output Signal can optionally be set via init. Otherwise it defaults to f(u.value), where f is the passed function and u is the passed Signal. The type of the output Signal can optionally be set via typ. Otherwise it defaults to the type of the initial value.\n\n\n\n"
 },
 
 {
