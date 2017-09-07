@@ -182,8 +182,8 @@ Tuple of the values of the contained Signals.
 """
 function Base.zip(u::Signal, us::Signal...)
     signals = (u,us...)
-    signal = Signal(Tuple{map(u -> eltype(typeof(u)), signals)...}, map(value, signals))
-    pasts = collect(map(u -> Array{eltype(typeof(u)), 1}(0), signals))
+    signal = Signal(Tuple{map(eltype, signals)...}, map(value, signals))
+    pasts = collect(map(u -> Array{eltype(u), 1}(0), signals))
     for i in 1:length(signals)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
@@ -204,7 +204,7 @@ Merge Signals into the current Signal. The value of the Signal is that from
 the most recent update.
 """
 function Base.merge(u::Signal, us::Signal...)
-    signal = Signal(typejoin(map(x -> eltype(typeof(x)), (u, us...))...), u.value)
+    signal = Signal(typejoin(map(eltype, (u, us...))...), u.value)
     for v in (u, us...)
         subscribe!(x -> push!(signal, x), v)
     end
