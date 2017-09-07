@@ -3,12 +3,27 @@ using FactCheck
 
 number() = round(Int, rand()*1000)
 
+abstract Action{T}
+type Update{T} <: Action{T}
+    val::T
+end
+type Reset{T} <: Action{T}
+    val::T
+end
+
 ## Basics
 
 facts("Basic checks") do
 
     a = Signal(number())
     b = map(x -> x*x, a)
+
+    context("Signal") do
+        as = Signal(Action, Update(1))
+        @fact typeof(value(as)) --> Update{Int64}
+        push!(as, Reset(1))
+        @fact typeof(value(as)) --> Reset{Int64}
+    end
 
     context("map") do
 
@@ -35,6 +50,10 @@ facts("Basic checks") do
 
         push!(b, number())
         @fact value(c) --> value(a) + value(b)
+
+        as = Signal(0)
+        bs = map(Update, as, typ = Action{Int64})
+        @fact typeof(bs) --> Signal{Action{Int64}}
     end
 
     context("zipmap") do
@@ -66,6 +85,11 @@ facts("Basic checks") do
         # way updates are pushed.
         @fact value(e) --> value(a)
 
+        # Merge two different signal types
+        as = Signal(Update(1))
+        bs = Signal(Reset(2))
+        cs = merge(as, bs)
+        @fact typeof(value(cs)) --> Update{Int64}
     end
 
     context("zip") do
@@ -92,6 +116,14 @@ facts("Basic checks") do
 
         e = zip(d, b, a, Signal(3))
         @fact value(e) --> (value(d), value(b), value(a), 3)
+
+        as = Signal(Action{Int64}, Update(1))
+        bs = Signal(Reset(2))
+        cs = zip(as, bs)
+        @fact typeof(cs) --> Signal{Tuple{Action{Int64}, Reset{Int64}}}
+
+        push!(as, Reset(3))
+        @fact typeof(cs) --> Signal{Tuple{Action{Int64}, Reset{Int64}}}
     end
 
     context("foldp") do
