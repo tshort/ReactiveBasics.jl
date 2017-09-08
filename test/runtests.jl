@@ -131,7 +131,6 @@ facts("Basic checks") do
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
-        nums = rand(Int, 100)
         nums = [6,3,1]
         map(x -> push!(a, x), nums)
         @fact sum(nums) --> value(f)
@@ -354,6 +353,21 @@ facts("Basic checks") do
         push!(x, 10)
         @fact value(y) --> 2
         @fact value(x) --> 10
+        push!(y, 20)
+        @fact value(y) --> value(x)
+        @fact value(y) --> 20
+        @fact value(xx) --> 40
+
+        x = Signal(1)
+        y = Signal(2)
+        xx = map(u -> 2u, x)
+        yy = map(u -> 3u, y)
+        bind!(x, y, initial = false)
+        @fact value(x) --> 1
+        @fact value(y) --> 2
+        push!(x, 10)
+        @fact value(y) --> 10
+        @fact value(yy) --> 30
         push!(y, 20)
         @fact value(y) --> value(x)
         @fact value(y) --> 20

@@ -293,12 +293,18 @@ end
 """
 $(SIGNATURES)
 
-For every update to `b` also update `a` with the same value and, if
-`twoway` is true, vice-versa.
-Initially update `a` with the value in `b`.
+For every update to `b` also update `a` with the same value and, if `twoway` is true,
+ice-versa.
+If `initial` is set to true, `a` is updated immediately and, if `twoway` is true, `b`
+is updated immediately as well.
 """
-function bind!(a::Signal, b::Signal, twoway=true)
-    push!(a, b.value)
+function bind!(a::Signal, b::Signal, twoway = true; initial = true)
+    if initial
+        push!(a, b.value)
+        if twoway
+            push!(b, a.value)
+        end
+    end
     if twoway
         subscribe!(u -> u != value(b) && push!(b, u), a)
     end
