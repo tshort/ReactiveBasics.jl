@@ -69,7 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ReactiveBasics.bind!",
     "category": "Function",
-    "text": "bind!(a, b)\nbind!(a, b, twoway)\n\n\nFor every update to b also update a with the same value and, if twoway is true, vice-versa. Initially update a with the value in b.\n\n\n\n"
+    "text": "bind!(a, b)\nbind!(a, b, twoway; initial)\n\n\nFor every update to b also update a with the same value and, if twoway is true, ice-versa. If initial is set to true, a is updated immediately and, if twoway is true, b is updated immediately as well.\n\n\n\n"
 },
 
 {
