@@ -347,7 +347,7 @@ facts("Basic checks") do
         y = Signal(2)
         xx = map(u -> 2u, x)
         yy = map(u -> 3u, y)
-        bind!(x, y, twoway = false)
+        bind!(x, y, false)
         @fact value(y) --> value(x)
         @fact value(y) --> 2
         push!(x, 10)

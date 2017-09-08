@@ -298,7 +298,7 @@ ice-versa.
 If `initial` is set to true, `a` is updated immediately and, if `twoway` is true, `b`
 is updated immediately as well.
 """
-function bind!(a::Signal, b::Signal; twoway = true, initial = true)
+function bind!(a::Signal, b::Signal, twoway = true; initial = true)
     if initial
         push!(a, b.value)
         if twoway
