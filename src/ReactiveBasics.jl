@@ -135,7 +135,7 @@ be set via `typ`. Otherwise it defaults to the type of the initial value.
                                         # every change in `as`
 """
 function zipmap(f, u::Signal, us::Signal...; init = f(zip(u, us...).value...), typ = typeof(init), max_buffer_size = 0)
-    zipped_signal = max_buffer_size == 0 ? zip(u, us...) : zip(max_buffer_size, u, us...)
+    zipped_signal = zip(u, us..., max_buffer_size = max_buffer_size)
     signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x...)), zipped_signal)
     signal
