@@ -134,8 +134,8 @@ be set via `typ`. Otherwise it defaults to the type of the initial value.
     cs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for
                                         # every change in `as`
 """
-function zipmap(f, u::Signal, us::Signal...; init = f(zip(u, us...).value...), typ = typeof(init))
-    zipped_signal = zip(u, us...)
+function zipmap(f, u::Signal, us::Signal...; init = f(zip(u, us...).value...), typ = typeof(init), max_buffer_size = 0)
+    zipped_signal = max_buffer_size == 0 ? zip(u, us...) : zip(max_buffer_size, u, us...)
     signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x...)), zipped_signal)
     signal
@@ -180,21 +180,42 @@ Tuple of the values of the contained Signals.
     signal = zip(Signal("Hello"), Signal("World"))
     value(signal)    # ("Hello", "World")
 """
-function Base.zip(u::Signal, us::Signal...)
+function Base.zip(u::Signal, us::Signal...; max_buffer_size = 0)
     signals = (u,us...)
     signal = Signal(Tuple{map(eltype, signals)...}, map(value, signals))
-    pasts = collect(map(u -> Array{eltype(u), 1}(0), signals))
+    pasts = map(u -> Array{eltype(u), 1}(max_buffer_size), signals)
+    max_buffer_size == 0 ? _zip!(signals, signal, pasts) : _zip!(signals, signal, pasts, max_buffer_size)
+    signal
+end
+
+function _zip!(signals, output, pasts)
     for i in 1:length(signals)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
-            not_empty_pasts = map(!isempty, pasts)
-            if all(not_empty_pasts)
-                zip_vals = map(shift!, pasts)
-                push!(signal, (zip_vals...))
+            if all(map(!isempty, pasts))
+                push!(output, map(shift!, pasts))
             end
         end
     end
-    signal
+end
+
+function _zip!(signals, output, pasts, max_buffer_size)
+    counters = zeros(Int64, length(signals))
+    start = 1
+    for i in 1:length(signals)
+        subscribe!(signals[i]) do u
+            if counters[i] >= max_buffer_size
+                error(@sprintf("Signal input %i reached the zipping buffer size of %i.", i, max_buffer_size))
+            end
+            pasts[i][mod(start - 1 + counters[i], max_buffer_size) + 1] = u
+            counters[i] += 1
+            if all(counters .> 0)
+                push!(output, map(u -> u[start], pasts))
+                start = mod(start, max_buffer_size) + 1
+                counters -= ones(counters)
+            end
+        end
+    end
 end
 
 """
