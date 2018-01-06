@@ -1,6 +1,6 @@
 module ReactiveBasics
 
-using DocStringExtensions
+using DocStringExtensions, DataStructures
 
 export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous,
        sampleon, preserve, filterwhen, zipmap
@@ -183,39 +183,16 @@ Tuple of the values of the contained Signals.
 function Base.zip(u::Signal, us::Signal...; max_buffer_size = 0)
     signals = (u,us...)
     signal = Signal(Tuple{map(eltype, signals)...}, map(value, signals))
-    pasts = map(u -> Array{eltype(u), 1}(max_buffer_size), signals)
-    max_buffer_size == 0 ? _zip!(signals, signal, pasts) : _zip!(signals, signal, pasts, max_buffer_size)
-    signal
-end
-
-function _zip!(signals, output, pasts)
+    pasts = map(u -> max_buffer_size != 0 ? CircularDeque{eltype(u)}(max_buffer_size) : Deque{eltype(u)}(), signals)
     for i in 1:length(signals)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
             if all(map(!isempty, pasts))
-                push!(output, map(shift!, pasts))
+                push!(signal, map(shift!, pasts))
             end
         end
     end
-end
-
-function _zip!(signals, output, pasts, max_buffer_size)
-    counters = zeros(Int64, length(signals))
-    start = 1
-    for i in 1:length(signals)
-        subscribe!(signals[i]) do u
-            if counters[i] >= max_buffer_size
-                error(@sprintf("Signal input %i reached the zipping buffer size of %i.", i, max_buffer_size))
-            end
-            pasts[i][mod(start - 1 + counters[i], max_buffer_size) + 1] = u
-            counters[i] += 1
-            if all(counters .> 0)
-                push!(output, map(u -> u[start], pasts))
-                start = mod(start, max_buffer_size) + 1
-                counters -= ones(counters)
-            end
-        end
-    end
+    signal
 end
 
 """
