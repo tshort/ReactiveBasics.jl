@@ -1,6 +1,6 @@
 module ReactiveBasics
 
-using DocStringExtensions
+using DocStringExtensions, DataStructures
 
 export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous,
        sampleon, preserve, filterwhen, zipmap
@@ -134,8 +134,8 @@ be set via `typ`. Otherwise it defaults to the type of the initial value.
     cs = zipmap((a,b) -> a + b, as, bs) # This calculation is done once for
                                         # every change in `as`
 """
-function zipmap(f, u::Signal, us::Signal...; init = f(zip(u, us...).value...), typ = typeof(init))
-    zipped_signal = zip(u, us...)
+function zipmap(f, u::Signal, us::Signal...; init = f(zip(u, us...).value...), typ = typeof(init), max_buffer_size = 0)
+    zipped_signal = zip(u, us..., max_buffer_size = max_buffer_size)
     signal = Signal(typ, init)
     subscribe!(x -> push!(signal, f(x...)), zipped_signal)
     signal
@@ -180,17 +180,15 @@ Tuple of the values of the contained Signals.
     signal = zip(Signal("Hello"), Signal("World"))
     value(signal)    # ("Hello", "World")
 """
-function Base.zip(u::Signal, us::Signal...)
+function Base.zip(u::Signal, us::Signal...; max_buffer_size = 0)
     signals = (u,us...)
     signal = Signal(Tuple{map(eltype, signals)...}, map(value, signals))
-    pasts = collect(map(u -> Array{eltype(u), 1}(0), signals))
+    pasts = map(u -> max_buffer_size != 0 ? CircularDeque{eltype(u)}(max_buffer_size) : Deque{eltype(u)}(), signals)
     for i in 1:length(signals)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
-            not_empty_pasts = map(!isempty, pasts)
-            if all(not_empty_pasts)
-                zip_vals = map(shift!, pasts)
-                push!(signal, (zip_vals...))
+            if all(map(!isempty, pasts))
+                push!(signal, map(shift!, pasts))
             end
         end
     end

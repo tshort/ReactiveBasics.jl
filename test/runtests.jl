@@ -124,10 +124,47 @@ facts("Basic checks") do
 
         push!(as, Reset(3))
         @fact typeof(cs) --> Signal{Tuple{Action{Int64}, Reset{Int64}}}
+
+        d = Signal(1)
+        b = Signal(2)
+        a = Signal(3)
+        e = zip(d, b, a, max_buffer_size = 1)
+        @fact value(e) --> (1,2,3)
+        push!(a, 1)
+        @fact value(e) --> (1,2,3)
+        error = false
+        try
+            push!(a, 1)
+        catch
+            error = true
+        end
+        @fact error --> true
+        push!(b, 1)
+        push!(d, 2)
+        @fact value(e) --> (2, 1, 1)
+
+        d = Signal(1)
+        b = Signal(2)
+        a = Signal(3)
+        e = zip(d, b, a, max_buffer_size = 2)
+        @fact value(e) --> (1,2,3)
+        push!(a, 1)
+        push!(a, 2)
+        @fact value(e) --> (1,2,3)
+        error = false
+        try
+            push!(a, 1)
+        catch
+            error = true
+        end
+        @fact error --> true
+        push!(b, 1)
+        push!(d, 2)
+        @fact value(e) --> (2, 1, 1)
     end
 
     context("foldp") do
-
+        a = Signal(0)
         ## foldp over time
         push!(a, 0)
         f = foldp(+, 0, a)
