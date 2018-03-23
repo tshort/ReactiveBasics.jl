@@ -329,6 +329,38 @@ facts("Basic checks") do
         @fact value(n) --> 6
     end
 
+    context("skip") do
+        x = Signal(0)
+        y = skip(2, x)
+        count = foldp((x, y) -> x+1, -1, y)
+        @fact value(y) --> 0
+        @fact value(count) --> 0
+
+        push!(x, 1)
+        @fact value(y) --> 0
+        @fact value(count) --> 0
+
+        push!(x, 2)
+        @fact value(y) --> 0
+        @fact value(count) --> 0
+
+        push!(x, 3)
+        @fact value(y) --> 3
+        @fact value(count) --> 1
+
+        push!(x, 4)
+        @fact value(y) --> 3
+        @fact value(count) --> 1
+
+        push!(x, 5)
+        @fact value(y) --> 3
+        @fact value(count) --> 1
+
+        push!(x, 6)
+        @fact value(y) --> 6
+        @fact value(count) --> 2
+    end
+
     context("previous") do
         x = Signal(0)
         y = previous(x)
