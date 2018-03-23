@@ -2,8 +2,8 @@ module ReactiveBasics
 
 using DocStringExtensions, DataStructures
 
-export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!, droprepeats, previous,
-       sampleon, preserve, filterwhen, zipmap
+export Signal, value, foldp, subscribe!, unsubscribe!, flatmap, flatten, bind!,
+       droprepeats, skip, previous, sampleon, preserve, filterwhen, zipmap
 
 # This API mainly follows that of Reactive.jl.
 
@@ -318,6 +318,21 @@ as the previous value of the Signal.
 function droprepeats{T}(input::Signal{T})
     result = Signal(T, value(input))
     subscribe!(u -> u != value(result) && push!(result, u), input)
+    result
+end
+
+"""
+$(SIGNATURES)
+
+Continuously skip a predefined number of updates to `input`
+"""
+function Base.skip{T}(num::Int, input::Signal{T})
+    result = Signal(T, value(input))
+    counter = 1
+    subscribe!(input) do u
+        mod(counter, num + 1) == 0 && push!(result, u)
+        counter = mod(counter, num + 1) + 1
+    end
     result
 end
 
