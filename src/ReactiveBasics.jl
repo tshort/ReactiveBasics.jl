@@ -40,7 +40,7 @@ value(text2)
 float_number = Signal(Float64, 1) # Optionally set the type of the Signal
 ```
 """
-type Signal{T}
+mutable struct Signal{T}
    value::T
    callbacks::Vector{Function}   # usually Functions, but could be other callable types
 end
@@ -231,7 +231,7 @@ end
 """
 Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates to `true`.
 """
-function Base.filter{T}(f, default::T, u::Signal{T})
+function Base.filter(f, default, u::Signal)
     signal = Signal(T, f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
     signal
@@ -243,7 +243,7 @@ $(SIGNATURES)
 Keep updates to `u` only when `predicate` is true.
 If `predicate` is false initially, the specified `default` value is used.
 """
-function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
+function filterwhen(predicate::Signal{Bool}, default, u::Signal)
     signal = Signal(T, predicate.value ? u.value : default)
     subscribe!(result -> predicate.value && push!(signal, result), u)
     subscribe!(v -> v && push!(signal, u.value), predicate)
