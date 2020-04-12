@@ -40,16 +40,16 @@ value(text2)
 float_number = Signal(Float64, 1) # Optionally set the type of the Signal
 ```
 """
-type Signal{T}
+mutable struct Signal{T}
    value::T
    callbacks::Vector{Function}   # usually Functions, but could be other callable types
 end
 
-Signal(val) = Signal(val, Function[])
+Signal(val::T) where {T} = Signal{T}(val, Function[])
+Signal(::Type{T}, x) where{T} = Signal{T}(x, Function[])
 
-Signal{T}(::Type{T}, val) = Signal{T}(val, Function[])
-
-Base.eltype{T}(::Type{Signal{T}}) = T
+Base.eltype(::Signal{T}) where {T} = T
+Base.eltype(::Type{Signal{T}}) where {T} = T
 
 """
 $(SIGNATURES)
@@ -231,7 +231,7 @@ end
 """
 Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates to `true`.
 """
-function Base.filter{T}(f, default::T, u::Signal{T})
+function Base.filter(f, default, u::Signal)
     signal = Signal(T, f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
     signal
@@ -243,7 +243,7 @@ $(SIGNATURES)
 Keep updates to `u` only when `predicate` is true.
 If `predicate` is false initially, the specified `default` value is used.
 """
-function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
+function filterwhen(predicate::Signal{Bool}, default, u::Signal)
     signal = Signal(T, predicate.value ? u.value : default)
     subscribe!(result -> predicate.value && push!(signal, result), u)
     subscribe!(v -> v && push!(signal, u.value), predicate)
@@ -315,7 +315,7 @@ $(SIGNATURES)
 Drop updates to `input` whenever the new value is the same
 as the previous value of the Signal.
 """
-function droprepeats{T}(input::Signal{T})
+function droprepeats(input::Signal)
     result = Signal(T, value(input))
     subscribe!(u -> u != value(result) && push!(result, u), input)
     result
@@ -326,7 +326,7 @@ $(SIGNATURES)
 
 Continuously skip a predefined number of updates to `input`
 """
-function Base.skip{T}(num::Int, input::Signal{T})
+function Base.skip(num::Int, input::Signal)
     result = Signal(T, value(input))
     counter = 1
     subscribe!(input) do u
@@ -356,7 +356,7 @@ $(SIGNATURES)
 
 Sample the value of `b` whenever `a` updates.
 """
-function sampleon{T}(a::Signal, b::Signal{T})
+function sampleon(a::Signal, b::Signal)
     result = Signal(T, value(b))
     subscribe!(u -> push!(result, value(b)), a)
     result
