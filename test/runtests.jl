@@ -18,9 +18,6 @@ end
 
 @testset "Basic checks" begin
 
-    x = Signal(Float32
-    @test isa(x, Signal{Type{Float32}}) == true
-
     a = Signal(number())
     b = map(x -> x*x, a)
 
@@ -217,7 +214,7 @@ end
         @test value(cs) == 5
     end
 
-    @testset "push! inside push!") begin
+    @testset "push! inside push!" begin
         a = Signal(0)
         b = Signal(1)
         subscribe!(x -> push!(a, x), b)

@@ -188,7 +188,7 @@ function Base.zip(u::Signal, us::Signal...; max_buffer_size = 0)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
             if all(map(!isempty, pasts))
-                push!(signal, map(shift!, pasts))
+                push!(signal, map(popfirst!, pasts))
             end
         end
     end
