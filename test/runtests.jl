@@ -16,7 +16,7 @@ end
 ## Basics
 
 
-@testset "Basic checks") begin
+@testset "Basic checks" begin
 
     x = Signal(Float32
     @test isa(x, Signal{Type{Float32}}) == true
