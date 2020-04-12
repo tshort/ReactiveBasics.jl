@@ -2,3 +2,7 @@ name = "ReactiveBasics"
 uuid = "5a33117a-3c68-4ec3-93b7-3fd64dc648a6"
 authors = ["pyrex41 <me@notreal.com>"]
 version = "0.1.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
