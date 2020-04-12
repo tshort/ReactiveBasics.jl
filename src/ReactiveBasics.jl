@@ -232,7 +232,7 @@ end
 Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates to `true`.
 """
 function Base.filter(f, default, u::Signal)
-    signal = Signal(T, f(u.value) ? u.value : default)
+    signal = Signal(f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
     signal
 end
@@ -244,7 +244,7 @@ Keep updates to `u` only when `predicate` is true.
 If `predicate` is false initially, the specified `default` value is used.
 """
 function filterwhen(predicate::Signal{Bool}, default, u::Signal)
-    signal = Signal(T, predicate.value ? u.value : default)
+    signal = Signal(predicate.value ? u.value : default)
     subscribe!(result -> predicate.value && push!(signal, result), u)
     subscribe!(v -> v && push!(signal, u.value), predicate)
     signal
@@ -316,7 +316,7 @@ Drop updates to `input` whenever the new value is the same
 as the previous value of the Signal.
 """
 function droprepeats(input::Signal)
-    result = Signal(T, value(input))
+    result = Signal(value(input))
     subscribe!(u -> u != value(result) && push!(result, u), input)
     result
 end
@@ -327,7 +327,7 @@ $(SIGNATURES)
 Continuously skip a predefined number of updates to `input`
 """
 function Base.skip(num::Int, input::Signal)
-    result = Signal(T, value(input))
+    result = Signal(value(input))
     counter = 1
     subscribe!(input) do u
         mod(counter, num + 1) == 0 && push!(result, u)
@@ -357,7 +357,7 @@ $(SIGNATURES)
 Sample the value of `b` whenever `a` updates.
 """
 function sampleon(a::Signal, b::Signal)
-    result = Signal(T, value(b))
+    result = Signal(value(b))
     subscribe!(u -> push!(result, value(b)), a)
     result
 end
