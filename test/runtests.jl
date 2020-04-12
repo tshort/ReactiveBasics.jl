@@ -256,7 +256,6 @@ end
         y = asyncmap(-, 0, x)
 
         @sync push!(x, 2)
-
         @test value(y) == -2
 
         x = Signal(1)
@@ -266,7 +265,6 @@ end
         end
 
         @sync push!(x, 2)
-
         @test value(y) == -2
     end
 

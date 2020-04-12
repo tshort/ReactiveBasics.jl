@@ -261,7 +261,10 @@ be set via `typ`. Otherwise it defaults to the type of the initial value.
 function Base.asyncmap(f, init, input::Signal, inputs::Signal...; typ = typeof(init))
     result = Signal(typ, init)
     map(input, inputs...) do args...
-        @async push!(result, f(args...))
+        @async begin
+            push!(result, f(args...))
+            yield()
+        end
     end
     result
 end
