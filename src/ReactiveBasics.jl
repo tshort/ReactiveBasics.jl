@@ -263,7 +263,6 @@ function Base.asyncmap(f, init, input::Signal, inputs::Signal...; typ = typeof(i
     map(input, inputs...) do args...
         @async begin
             push!(result, f(args...))
-            yield()
         end
     end
     result
