@@ -40,16 +40,16 @@ value(text2)
 float_number = Signal(Float64, 1) # Optionally set the type of the Signal
 ```
 """
-type Signal{T}
+mutable struct Signal{T}
    value::T
    callbacks::Vector{Function}   # usually Functions, but could be other callable types
 end
 
-Signal(val) = Signal(val, Function[])
+Signal(val::T) where {T} = Signal{T}(val, Function[])
+Signal(::Type{T}, x) where{T} = Signal{T}(x, Function[])
 
-Signal{T}(::Type{T}, val) = Signal{T}(val, Function[])
-
-Base.eltype{T}(::Type{Signal{T}}) = T
+Base.eltype(::Signal{T}) where {T} = T
+Base.eltype(::Type{Signal{T}}) where {T} = T
 
 """
 $(SIGNATURES)
@@ -188,7 +188,7 @@ function Base.zip(u::Signal, us::Signal...; max_buffer_size = 0)
         subscribe!(signals[i]) do u
             push!(pasts[i], u)
             if all(map(!isempty, pasts))
-                push!(signal, map(shift!, pasts))
+                push!(signal, map(popfirst!, pasts))
             end
         end
     end
@@ -231,8 +231,8 @@ end
 """
 Return a Signal that updates based on the Signal `u` if `f(value(u))` evaluates to `true`.
 """
-function Base.filter{T}(f, default::T, u::Signal{T})
-    signal = Signal(T, f(u.value) ? u.value : default)
+function Base.filter(f, default, u::Signal)
+    signal = Signal(f(u.value) ? u.value : default)
     subscribe!(result -> f(result) && push!(signal, result), u)
     signal
 end
@@ -243,8 +243,8 @@ $(SIGNATURES)
 Keep updates to `u` only when `predicate` is true.
 If `predicate` is false initially, the specified `default` value is used.
 """
-function filterwhen{T}(predicate::Signal{Bool}, default::T, u::Signal{T})
-    signal = Signal(T, predicate.value ? u.value : default)
+function filterwhen(predicate::Signal{Bool}, default, u::Signal)
+    signal = Signal(predicate.value ? u.value : default)
     subscribe!(result -> predicate.value && push!(signal, result), u)
     subscribe!(v -> v && push!(signal, u.value), predicate)
     signal
@@ -261,7 +261,9 @@ be set via `typ`. Otherwise it defaults to the type of the initial value.
 function Base.asyncmap(f, init, input::Signal, inputs::Signal...; typ = typeof(init))
     result = Signal(typ, init)
     map(input, inputs...) do args...
-        @async push!(result, f(args...))
+        @async begin
+            push!(result, f(args...))
+        end
     end
     result
 end
@@ -315,8 +317,8 @@ $(SIGNATURES)
 Drop updates to `input` whenever the new value is the same
 as the previous value of the Signal.
 """
-function droprepeats{T}(input::Signal{T})
-    result = Signal(T, value(input))
+function droprepeats(input::Signal)
+    result = Signal(value(input))
     subscribe!(u -> u != value(result) && push!(result, u), input)
     result
 end
@@ -326,8 +328,8 @@ $(SIGNATURES)
 
 Continuously skip a predefined number of updates to `input`
 """
-function Base.skip{T}(num::Int, input::Signal{T})
-    result = Signal(T, value(input))
+function Base.skip(num::Int, input::Signal)
+    result = Signal(value(input))
     counter = 1
     subscribe!(input) do u
         mod(counter, num + 1) == 0 && push!(result, u)
@@ -356,8 +358,8 @@ $(SIGNATURES)
 
 Sample the value of `b` whenever `a` updates.
 """
-function sampleon{T}(a::Signal, b::Signal{T})
-    result = Signal(T, value(b))
+function sampleon(a::Signal, b::Signal)
+    result = Signal(value(b))
     subscribe!(u -> push!(result, value(b)), a)
     result
 end
